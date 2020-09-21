@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# script: ListOptions
+action="DBListFields"
+actionversion=" 1.0; 2020-09-11"
+#
+# aim: list the options loaded from the run_config.yaml file
+
+########################################################################
+# Edit here if necessary
+
+####################### no edits below this line #######################
+
+# creator
+creator=${action}
+creatorversion=${actionversion}
+
+echo "#################################################"
+echo "# List of Options defined in run_config.yaml    #"
+echo "#################################################"
+
+echo "# script name: ${scriptname}"
+echo "# version: ${scriptversion}"
+echo
+echo "# config from: ${run_config}"
+echo "-------------------------------------------------"
+parse_yaml ${run_config} "CONF_"
+echo "-------------------------------------------------"

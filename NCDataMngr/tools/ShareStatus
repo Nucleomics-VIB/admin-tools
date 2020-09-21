@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# script: ShareStatus
+action="DBListFields"
+actionversion=" 1.0; 2020-09-11"
+#
+# aim: Prints the storage usage status 
+# for ${CONF_mount_point}/${CONF_mount_path} (aka THE Share)
+# adding -p <subfolder> allows going deeper (eg -p NovaSeq6000)
+
+########################################################################
+
+# example result
+# -------------------------------------------------
+# # getting share occupancy via nuc4ssh
+# # folder content details
+#  16.9T NovaSeq6000
+#  11.7T HiSeq4000
+#   3.1T NextSeq500
+#   2.6T MiSeq
+#   2.1T PacBio
+#   1.3T GridION
+#   1.3T DNBSEQG400
+# 289.7G HiSeq2500
+#  42.2G IlluminaSavData
+#   1.0M PreTrash
+# -------------------------------------------------
+# # total size of 0003_Runs
+# 39.4T /mnt/nuc-transfer/0003_Runs
+# -------------------------------------------------
+
+####################### no user edits below this line ##################
+
+#################
+# initialisation
+#################
+
+# creator
+creator=${action}
+creatorversion=${actionversion}
+
+usage='# Usage: '${scriptname}' -a ${action} {nuc1ssh|nuc1local|nuc4ssh} -p <subfolder path>
+# example1: '${scriptname}' -a ShareStatus
+# example2: '${scriptname}' -a ShareStatus -p "NovaSeq6000"
+# script version '${actionversion}
+
+######################
+# main code
+######################
+
+basedir=${CONF_mount_path}/${opt_actparams:-""}
+
+echo "---------------------------------------------------------------------------------"
+echo "# Share occupancy of /${basedir} from DUC via ${CONF_duc_access} access"
+echo "---------------------------------------------------------------------------------"
+
+case ${CONF_duc_access} in
+
+  nuc1local)
+    echo "# level_1 folder content details"
+    cmd="${CONF_duc_nuc1exe} ls \
+        -d ${CONF_duc_nuc1db} \
+        ${CONF_duc_nuc1mnt}/${CONF_mount_path} \
+        | sort -h -r"
+    eval ${cmd}
+    echo "-------------------------------------------------"
+    cmd="${CONF_duc_nuc1exe} ls -D \
+        -d ${CONF_duc_nuc1db} \
+        ${CONF_duc_nuc1mnt}/${CONF_mount_path}"
+    eval ${cmd};;
+    
+  nuc1ssh)
+    echo "# level_1 folder content details"
+    cmd="ssh ${CONF_duc_nuc1addr} ${q}${CONF_duc_nuc1exe} ls \
+        -d ${CONF_duc_nuc1db} \
+        ${CONF_duc_nuc1mnt}/${basedir}${q} \
+        | sort -h -r"
+    eval ${cmd}
+    echo "-------------------------------------------------"
+    cmd="ssh ${CONF_duc_nuc1addr} ${q}${CONF_duc_nuc1exe} ls -D \
+        -d ${CONF_duc_nuc1db} \
+        ${CONF_duc_nuc1mnt}/${basedir}${q}"
+    eval ${cmd};;
+    
+  nuc4ssh)
+    echo "# level_1 folder content details"
+    cmd="ssh ${CONF_duc_nuc4addr} ${q}${CONF_duc_nuc4exe} ls \
+        -d ${CONF_duc_nuc4db} \
+        ${CONF_duc_nuc4mnt}/${CONF_mount_path}${q} \
+        | sort -h -r"
+    eval ${cmd}
+    echo "-------------------------------------------------"
+    cmd="ssh ${CONF_duc_nuc4addr} ${q}${CONF_duc_nuc4exe} ls -D \
+        -d ${CONF_duc_nuc4db} \
+        ${CONF_duc_nuc4mnt}/${CONF_mount_path}${q}"
+    eval ${cmd};;
+
+       *)
+         echo ${usage}
+         exit 1
+esac
+
+echo "-------------------------------------------------"
+
+exit 0

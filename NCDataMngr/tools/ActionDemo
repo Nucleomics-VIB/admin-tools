@@ -1,0 +1,169 @@
+#!/bin/bash
+
+# script: ActionDemo
+action="ActionDemo"
+actionversion=" 1.0; 2020-09-11"
+#
+# aim: explain how to pass parameters to an action script
+# NOTE: that complex variable values need double-quote & quote
+# please add here practical code with proper comments to help build better Actions
+# you may also add additional commented echo lines to debug code where useful
+
+########################################################################
+# Edit here if necessary
+
+# in this part, you can add user-editable variable definitions 
+# that are not already passed from the  main script
+# 
+# non-editable code should be added below the line
+#
+####################### no user edits below this line ##################
+
+#################
+# initialisation
+#################
+
+# creator
+creator=${action}
+creatorversion=${actionversion}
+
+usage='# ------------------------------------------------------------------------------
+# Usage: '${scriptname}' -a '${action}' -p var1=1 -p var2=azerty -p var3='${d}${q}'two words'${q}${d}' -p var4='${d}${q}'accepts (){}/\:;,-'${q}${d}'
+# ------------------------------------------------------------------------------
+# opt_actparams is: var1=1 var2=azerty var3="two words" var4="accepts (){}/\:;,-"
+# var1 has value: 1
+# var2 has value: azerty
+# var3 has value: "two words"
+# var4 has value: "accepts (){}/\:;,-"
+# ------------------------------------------------------------------------------
+#
+# script version '${actionversion}
+
+if [ ! -z "${opt_actparams}" ]
+then
+
+echo
+echo "############################"
+echo "# we are now in ActionDemo"
+echo
+
+##################################
+# variable extraction and testing
+##################################
+
+echo
+echo "########### variable extraction and testing #############"
+
+# 1) variables defines in run_config.yaml
+# after parsing the config file at startup, the variables are defined
+# they are available for all ActionScripts
+# all such variables have a prefix CONF_ followed by the joined strings
+# eg: ${CONF_database_path}
+
+
+# 2) a special case for variables with array content like CONF_illumina_folderarray 
+# ${CONF_illumina_folderarray}="HiSeq2500 HiSeq4000 MiSeq NextSeq500 NovaSeq6000"
+# to convert CONF_illumina_folderarray to bash array
+read -a allowed <<< ${CONF_illumina_folderarray}
+
+echo
+echo "# the variable 'run_config_folderarray' defined in run_config.yaml"
+echo "  is an array of ${#allowed[@]} elements"
+echo "  and contains: '"${allowed[@]}"'"
+
+
+# 3) variables passed through -p (opt_actparams) in the main script
+
+echo
+echo "# user defined variables using -p var=value"
+echo "opt_actparams is: ${opt_actparams[@]}"
+for v in ${my_vars[@]}; do
+  echo "${v} has value: ${!v}"
+done
+
+####################################################################################
+
+# the variables can/should now be tested against the expected variables in your code
+
+# checks:
+#    input files and folder exist and can be read
+#    user provided all required variables
+#    if required parameter were passed from NCDataMngr with -p, then
+
+# or echo ${usage} and die
+
+######################
+# main code
+######################
+
+echo
+echo "########### conversions #############"
+
+# pass a list of items to be converted to an array
+testlist="FolderID=100 Creator=Me BAD=1"
+echo
+echo "# converting string to array with split2array()"
+echo "the test string is: '${testlist}'"
+arr=( $(split2array "${testlist}" " ") )
+echo "${arr[@]} has ${#arr[@]} elements"
+
+# test pairlist2arrays
+echo
+echo "# using pairlist2arrays()"
+echo "# test list: ${testlist}"
+res=$(pairlist2arrays "${testlist}")
+
+# split res into two new arrays
+IFS='|' read -a ar <<< "${res}"
+echo "keys are: ${ar[O]}";     # => FolderID Creator BAD
+echo "values are: ${ar[1]}";   # => 100 Me 1
+
+echo
+echo "# joining the results with comma with join_by()"
+# do not quote the array!
+echo "$( join_by ',' ${ar[O]} )";   # => FolderID,Creator,BAD
+echo "$( join_by ',' ${ar[1]} )";   # => 100,Me,1
+
+echo
+echo "########### database testing #############"
+
+echo
+table="Folders"
+echo "# test if fields are valid for table '"${table}"' with validFields()"
+existing_fields=( $(delimited_fields "${table}" " ") )
+echo "# existing fields are: ${existing_fields[@]}"
+
+echo
+echo "# trying with correct field names"
+test_row="FolderID=1 Creator=Me FolderName='/some/path'"
+echo "test row: ${test_row}"
+validFields Folders "${test_row}" && echo "# fields all exist in '"${table}"'"
+
+echo
+echo "# trying with a bad field name"
+test_row="FolderID=1 Creator=Me FolderName='/some/path' MyBAD=0"
+echo "test row: ${test_row}"
+validFields Folders "${test_row}" && echo "# fields all exist in '"${table}"'"
+
+echo
+echo "########### more to come #############"
+
+
+# your nice code comes here
+# try to use custom functions and add them to custom_functions.sh
+#     so that they can be recycled
+#
+# ADD COMMENTS to your code so that others can understant it
+#
+# good coding
+
+echo
+echo "${usage}"
+
+else
+
+echo "${usage}"
+
+fi
+
+exit 0

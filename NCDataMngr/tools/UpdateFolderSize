@@ -1,0 +1,89 @@
+#!/bin/bash
+
+# script: UpdateFolderSize
+action="UpdateFolderSize"
+actionversion=" 1.0; 2020-09-11"
+#
+# aim: add or change FolderSize for a given FolderName based on current DUC info
+
+usage='# Usage: '${scriptname}' -a '${action}' -p foldername=<FolderName> -p comment=<Comment> (optional)
+# script version '${actionversion}
+
+########################################################################
+# Edit local variables here if necessary
+
+# get extra arguments from ${opt_actparams} (here an array of up to 2)
+r_foldername=${opt_actparams[0]}
+r_comment_add=${opt_actparams[1]:-""}
+status="done"
+
+####################### no edits below this line #######################
+
+# FolderName is provided
+if [ -z "${opt_actparams[0]}" ]
+then
+	echo "# no Folder Name provided"
+	echo "${usage}"
+	exit 1
+fi
+
+# sqlite3 and share variables
+databasepath=$CONF_database_path;  # "/Users/u0002316/databases"
+databasename=$CONF_database_name;  # "NCDataMngr.sqlite"
+mountpoint=$CONF_mount_point;      # "/Volumes/lvs/GBW-0047_NUC_Transfers"
+mountpath=$CONF_mount_path;        # "0003_Runs"
+
+# date-tag
+actiondate=$(date +%s)
+
+# creator
+creator=${action}
+creatorversion=${actionversion}
+
+# get FolderPath from database into array
+query_results=($(split2array $(sqlite3 "${databasepath}/${databasename}" 'SELECT FolderID,FolderPath,FolderSize,Comment FROM Folders WHERE FolderName="'${r_foldername}'"';)))
+
+echo "# ${query_results[@]}"
+r_folderid="${query_results[0]}"
+r_folderpath="${query_results[1]}"
+r_foldersize="${query_results[2]}"
+cur_comment="${query_results[3]}"
+newcomment="${cur_comment}"
+
+# get size from DUC using FolderPath and FolderName
+ducfoldersize=$(get_folder_size "${r_folderpath}/${r_foldername}")
+
+# add comment if provided
+if [ ! -z ${r_comment_add} ]; then
+newcomment="${cur_comment}, ${r_comment_add}"
+fi
+
+# replace values in the Folders table
+q='"'
+cmd="sqlite3 "${databasepath}/${databasename}" 'UPDATE Folders SET FolderSize=${q}${ducfoldersize}${q},Comment=${q}${newcomment}${q} WHERE FolderName=${q}${r_foldername}${q}'"
+eval ${cmd}
+
+# now add the Actions record
+a_comment="size: ${r_foldersize} => ${ducfoldersize} ; comment: ${cur_comment} => ${newcomment}"
+
+# insert action row in Actions table using ${currentFolderID}
+sqlite3 "${databasepath}/${databasename}" "INSERT INTO Actions 
+	(
+	FolderID, 
+	Creator, 
+	CreatorVersion, 
+	ActionDate, 
+	ActionName, 
+	Status, 
+	Comment
+	) 
+VALUES (
+	\"${r_folderid}\", 
+	\"${creator}\", 
+	\"${creatorversion}\", 
+	\"${actiondate}\", 
+	\"${scriptname}\", 
+	\"${status}\", 
+	\"${a_comment}\"
+	);"
+

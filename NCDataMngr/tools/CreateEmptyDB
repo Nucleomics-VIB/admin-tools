@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# script: CreateEmptyDB
+action="CreateEmptyDB"
+actionversion=" 1.0; 2020-09-11"
+#
+# aim: create en empty sqlite3 database from the provided dump (structure only)
+# note: if the output exists, first rename the existing file with timestamp
+#   to avoid erroneous usage, you then need to re-run the command
+
+########################################################################
+# Edit here if necessary
+
+####################### no edits below this line #######################
+
+# sqlite3 variables
+databasepath=$CONF_database_path;  # "/Users/u0002316/databases"
+databasename=$CONF_database_name;  # "NCDataMngr.sqlite"
+databasedump=$CONF_database_dump;  # "NCDataMngr_dump.sql"
+
+# date-tag
+actiondate=$(date +%s)
+
+# creator
+creator=${action}
+creatorversion=${actionversion}
+
+# create database from dump if not existing
+if [ -f "${databasepath}/${databasename}" ]; then
+	echo "# database ${databasename} already exists in ${databasepath}"
+	echo "# creating a backup copy before creating the empty database"
+	mv "${databasepath}/${databasename}" \
+		"${databasepath}/${databasename%.sqlite}_${actiondate}.sqlite"
+	echo "# please re-run the current command now"
+else
+	sqlite3 -init "${databasedump}" "${databasepath}/${databasename}" ""
+	# check for success
+	if [ $? -eq 0 ]; then
+		echo "# database ${databasename} was created in ${databasepath}"
+	else
+		echo "# failed to create the database"
+		exit 1
+	fi
+fi

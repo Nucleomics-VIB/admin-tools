@@ -1,0 +1,80 @@
+## global definitions
+# this is a dummy config file which requires additional editing to become functional
+# please edit the fields markes by <...>
+# you are free to edit any other fields 
+# as long as you do not change the variable names (left of the :)
+
+database:
+  path: "/path /to/the/database"
+  name: "NCDataMngr.sqlite"
+  dump: "NCDataMngr_dump.sql"
+
+mount:
+  point: "/mnt/your_mounted_NAS"
+  path: "BIG_data_folder"
+
+#more:
+#  option1:
+#  option2:
+
+
+## global definitions parsed at main script startup
+# leading to definition of variables accessible through all sub-commands
+# some of the variables below are used in custom functions and/or Action scripts 
+# and should be present to get a functional program
+
+# example
+#----------------
+#more:
+#  option1: value1
+#  option2: value2
+#----------------
+# is evaluated at runtime:
+# CONF_more_option1=value1 (callable from ${CONF_more_option1})
+# CONF_more_option2=value2 (callable from ${CONF_more_option1})
+
+database:
+  path: "</path /to/the/database>"
+  name: "NCDataMngr_test.sqlite"
+  dump: "NCDataMngr_dump.sql"
+
+mount:
+  point: "</mnt/your_mounted_NAS>"
+  path: "<basedir>"
+  archivepath: "<path/to/ArchiveForTransfer>"
+  savpath: "<path/to/IlluminaSavData>"
+  pretrash: "<path/to/PreTrash>"
+
+mgi:
+  dnbseqg400: "DNBSEQG400"
+  
+ont:
+  gridion: "GridION"
+
+illumina:
+  hiseq2500: "HiSeq2500"
+  hiseq4000: "HiSeq4000"
+  savsata: "IlluminaSavData"
+  miseq: "MiSeq"
+  nextseq500: "NextSeq500"
+  novaseq6000: "NovaSeq6000"
+  folderarray: "HiSeq2500 HiSeq4000 MiSeq NextSeq500 NovaSeq6000"
+
+pacbio:
+  sequel: "Pacbio"
+
+other:
+  pretrash: "PreTrash"
+
+# query duc local or via ssh access of {"nuc1ssh" "nuc1local" "nuc4ssh"}
+# change this part if you have a unique DUC server or use it on the current machine>
+# also edit the corresponding custom functions to match your needs
+
+duc:
+  access: "nuc1ssh"
+  nuc1addr: "<URL/of/duc-server1>"
+  nuc1db: "<path/to/duc-db_on_server1>"
+  nuc1mnt: "<path/to/BigData_mount_on_DUC_server1>"
+  nuc4addr: "<URL/of/duc-server4>"
+  nuc4db: "<path/to/duc-db_on_server4>"
+  nuc4mnt: "<path/to/BigData_mount_on_DUC_server4>"

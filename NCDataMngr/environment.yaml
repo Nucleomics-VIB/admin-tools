@@ -1,0 +1,37 @@
+## software requirements for the whole project
+# file: environment.yaml
+# this file is meant to install all dependencies using conda
+# search for dependencies at https://anaconda.org/anaconda/repo
+# please include a validated version number as minimal version
+# and test more recent versions before editing this file
+
+################################################################################
+# !! this is only a beta version, it will require refinements before being used
+################################################################################
+
+# create env with this file:
+# conda env create --file environment.yaml
+
+name: NDCDataMngr_env
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+
+# examples
+# specific version
+#  - numpy=1.9.*
+# specify version range 
+#  - numpy>=1.2.3, <1.3
+# specify the channel
+#  - conda-forge::beautifulsoup4
+
+dependencies:
+  - python=3.8
+  - gawk>=5.1.0
+  - conda-forge::sqlite>=3.33.0
+  - conda-forge::coreutils>=8.3.*
+
+#  - pip:
+#    - git+https://github.com/blaze/dask.git#egg=dask[complete]

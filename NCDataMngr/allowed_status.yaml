@@ -1,0 +1,9 @@
+## allowed_status.yaml
+# list of allowed status names
+# add new statuses with parsimony
+
+action:
+  status: "submitted running done failed"
+
+project:
+  status: "initiated wetlab sequencing analysis shared delivered paused aborted terminated"

@@ -1,0 +1,31 @@
+## allowed_actions.yaml
+# list of allowed actions names
+# add new actions after creating the corresponding script
+# add a short usage text to explain what the action is for
+
+ActionDemo:
+  usage: Shows a simple example for passing variables to an Action script
+ShareStatus:
+  usage: Shows the current usage of the share defined in 'run_config.yaml' as '${CONF_mount_point}/${CONF_mount_path}'; adding '-p <subfolder>' allows going deeper (eg -p NovaSeq6000)
+DBListFields:
+  usage: Shows a list of all fields defined in the DB tables (non *View tables); adding '-p details' shows the table design details
+ListOptions:
+  usage: Shows the list of all variables defined in 'run_config.yaml'
+CreateEmptyDB:
+  usage: Creates a sqlite2 database based on the dump file defined in 'run_config.yaml' as '${CONF_database_dump}'
+AddIlluminaFolders:
+  usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Illumina Run folders (identified by their name eg. 190807_7001450_0488_AH3HVFBCX3_exp3209)
+UpdateFolderSize:
+  usage: Adds or changes the size of a folder based on the data present in the DUC database
+UpdateStatus:
+  usage: Changes the status of a Folder record with one of the choices from 'allowed_status.yam'
+ChangeProtection:
+  usage: Changes the protection status of a Folder record (value can be 0 for unprotected or 1 for protected)
+TransferFolder:
+  usage: Moves a Folder from its current location to a new location on the Share provided as -p newloc=<full_share_path>
+ArchiveFolder:
+  usage: Creates a tgz archive of a Folder into '${CONF_mount_archivepath}' defined in 'run_config.yaml' to prepare it for delivery
+ArchiveSAV:
+  usage: Extracts the SAV data from an Illumina Run-folder and archives it in '${CONF_mount_savpath}' defined in 'run_config.yaml'
+PreTrashFolder:
+  usage: Moves a folder arrived at End Of Life into '${CONF_mount_pretrash}' where it will be deleted by a super-user
