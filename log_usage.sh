@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 
 # A script to log the cpu disk_IO% and RAM(GB) usage
 # launch in separate window to monitor a job
