@@ -54,14 +54,9 @@ d='"'
 mkdir -p backups
 
 # source shared functions from the shared subfolder
-if [[ -f "shared/*_functions.sh" ]]
-then
-	. shared/*_functions.sh
-	# echo "# custom_functions were sourced"
-else
-	echo "# *_functions.sh not found in shared/"
-	exit 1
-fi
+[[ -n $(find shared -maxdepth 1 -type f -name '*_functions.sh') ]] \
+	&& . shared/*_functions.sh \
+	|| { echo "# *_functions.sh not found in shared/"; exit 1; }
 
 # read yaml configuration and process it
 run_config=${opt_config:-"run_config.yaml"}
