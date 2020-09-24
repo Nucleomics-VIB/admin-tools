@@ -30,7 +30,7 @@ if [ -f "${databasepath}/${databasename}" ]; then
 	echo "# database ${databasename} already exists in ${databasepath}"
 	echo "# creating a backup copy before creating the empty database"
 	mv "${databasepath}/${databasename}" \
-		"${databasepath}/${databasename%.sqlite}_${actiondate}.sqlite"
+		"backups/${databasepath}/${databasename%.sqlite}_${actiondate}.sqlite"
 	echo "# please re-run the current command now"
 else
 	sqlite3 -init "${databasedump}" "${databasepath}/${databasename}" ""
