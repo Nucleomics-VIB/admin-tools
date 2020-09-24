@@ -10,31 +10,27 @@
 PRAGMA foreign_keys = false;
 
 -- ----------------------------
---  Table structure for Actions
+--  Table structure for custom
 -- ----------------------------
-DROP TABLE IF EXISTS "Actions";
-CREATE TABLE "Actions" (
-	 "FolderID" INTEGER NOT NULL,
-	 "ActionID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	 "Creator" TEXT(255,0) NOT NULL,
-	 "CreatorVersion" TEXT(255,0),
-	 "ActionDate" TEXT NOT NULL,
-	 "ActionName" TEXT(255,0),
-	 "Comment" TEXT(255,0)
+DROP TABLE IF EXISTS "Variables";
+CREATE TABLE "Variables" (
+	 "VarID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	 "name" TEXT(255,0),
+	 "value" TEXT(255,0)
 );
-INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("Actions", '0');
+INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("Variables", '0');
 
 -- ----------------------------
 --  Table structure for Folders
 -- ----------------------------
 DROP TABLE IF EXISTS "Folders";
 CREATE TABLE "Folders" (
-	 "FolderID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	 "Creator" TEXT(255,0) NOT NULL,
+	 "FolderID" INTEGER NOT NULL PRIMARY KEY,
+	 "Creator" TEXT(255,0),
 	 "CreatorVersion" TEXT(255,0),
-	 "DBAddDate" TEXT(255,0) NOT NULL,
-	 "FolderPath" TEXT(255,0),
-	 "FolderName" TEXT(255,0) NOT NULL UNIQUE,
+	 "DBAddDate" TEXT(255,0),
+	 "FolderPath" TEXT(255,0) NOT NULL,
+	 "FolderName" TEXT(255,0) NOT NULL,
 	 "FolderSize" INTEGER(20,0),
 	 "Protection" INTEGER(1,0),
 	 "DeviceModel" TEXT(255,0),
@@ -45,10 +41,25 @@ CREATE TABLE "Folders" (
 	 "ProjectNR" TEXT(255,0),
 	 "Status" TEXT(255,0),
 	 "DeliveryDate" TEXT(255,0),
-	 "Comment" TEXT(255,0),
-	CONSTRAINT "folder2action" FOREIGN KEY ("FolderID") REFERENCES "Actions" ("FolderID") ON DELETE CASCADE ON UPDATE CASCADE
+	 "Comment" TEXT(255,0)
 );
 INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("Folders", '0');
+
+-- ----------------------------
+--  Table structure for Actions
+-- ----------------------------
+DROP TABLE IF EXISTS "Actions";
+CREATE TABLE "Actions" (
+	 "FolderID" INTEGER NOT NULL,
+	 "ActionID" INTEGER NOT NULL PRIMARY KEY,
+	 "Creator" TEXT(255,0),
+	 "CreatorVersion" TEXT(255,0),
+	 "ActionDate" TEXT,
+	 "ActionName" TEXT(255,0),
+	 "Comment" TEXT(255,0),
+	CONSTRAINT "Folders2Actions" FOREIGN KEY ("FolderID") REFERENCES "Folders" ("FolderID") ON DELETE CASCADE ON UPDATE CASCADE
+);
+INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("Actions", '0');
 
 -- ----------------------------
 --  Table structure for version
@@ -59,7 +70,7 @@ CREATE TABLE "version" (
 	 "vdate" text
 );
 INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("version", '0');
-INSERT INTO "version" (vnum, vdate) VALUES ("1.0", "2020-09-11");
+INSERT INTO "version" (vnum, vdate) VALUES ("1.1", "2020-09-23");
 
 -- ----------------------------
 --  View structure for ActionView
@@ -67,6 +78,7 @@ INSERT INTO "version" (vnum, vdate) VALUES ("1.0", "2020-09-11");
 DROP VIEW IF EXISTS "ActionView";
 CREATE VIEW "ActionView" AS SELECT
 Actions.*,
+Folders.FolderPath,
 Folders.FolderName
 FROM
 Actions
@@ -76,9 +88,9 @@ Actions.FolderID ASC,
 Actions.ActionID ASC;
 
 -- ----------------------------
---  View structure for RunView
+--  View structure for FolderView
 -- ----------------------------
-DROP VIEW IF EXISTS "RunView";
+DROP VIEW IF EXISTS "FolderView";
 CREATE VIEW "FolderView" AS SELECT
 Folders.*
 FROM
@@ -87,8 +99,14 @@ ORDER BY
 Folders.FolderID ASC;
 
 -- ----------------------------
+--  Indexes structure for table Folders
+-- ----------------------------
+CREATE UNIQUE INDEX "idx_Folders_FolderPath_FolderName" on Folders ( "FolderPath", "FolderName" );
+
+-- ----------------------------
 --  Indexes structure for table Actions
 -- ----------------------------
-CREATE INDEX "FolderID" ON Actions ("FolderID" ASC);
+CREATE INDEX "idx_Actions_FolderID" ON Actions ("FolderID" ASC);
+CREATE UNIQUE INDEX "idx_Actions_FolderID_Creator" ON Actions ("FolderID" ASC, "Creator");
 
 PRAGMA foreign_keys = true;

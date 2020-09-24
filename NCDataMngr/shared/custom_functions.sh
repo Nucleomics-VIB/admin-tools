@@ -44,10 +44,10 @@ function process_config {
   if [[ -f "${config}" ]]; then
     set -a
     # create tmp file and source it to populate the variables
-    parse_yaml ${config} "CONF_" > ./tmp && \
-    . ./tmp
+    parse_yaml ${config} "CONF_" > .tmp && \
+    . .tmp
     # echo "# ${run_config} was sourced"
-    rm ./tmp
+    rm .tmp
     set +a
   else
     echo "${config} not found"
@@ -116,7 +116,7 @@ function pairlist2arrays {
   input=$1
   outsep=$2
   # convert argument $1 to array
-  listofpairs=( $(echo $input) ); # an space delimited list of key=value pairs
+  listofpairs=( $(echo $input) ); # a space delimited list of key=value pairs
   # convert row into two arrays, one for keys and one for values
   local keyarray=()
   local valarray=()
@@ -276,6 +276,70 @@ function validDBFields {
   return 0
 }
 
+
+#--------------------------------------------------------------------------------------
+# send a query on a table + fields and return the row count
+# several field=value pairs can be provided to build a specific query
+# example arguments: Folders FolderPath=<...> FolderName=<...>
+# obviously the fields should exist in that table
+# the function returns the number of matching rows
+# 0 means that the row does not exist
+
+function Querytable2Count {
+  table=$1
+  shift
+  query=( $@ ); # an array of value pairs field=value to build a table row
+
+  # build base sqlite SELECT call
+  sqlq="SELECT COUNT(*) FROM ${table} WHERE "
+
+  # add WHERE clause(s)
+  wherec=""
+  for kv_pair in ${query[@]}; do
+    # split one pair to the two arrays
+    spl=( $(split2array "${kv_pair}" "=") )
+    # add to both arrays
+    wherec="${wherec} AND ${spl[0]}=${d}${spl[1]}${d}"
+  done
+
+  # concatenate run and return count
+  sqlq=${sqlq}${wherec# AND }
+  cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${s}${sqlq}${s};"
+  # echo "# ${cmd}"
+  eval "${cmd}"
+}
+
+
+#--------------------------------------------------------------------------------------
+# send a query on a table + fields and return the filtered rows
+# several field=value pairs can be provided to build a specific query
+# example arguments: Folders FolderPath=<...> FolderName=<...>
+# obviously the fields should exist in that table
+# the function returns the full rows with | separators
+
+function Querytable2Data {
+  table=$1
+  shift
+  query=( $@ ); # an array of value pairs field=value to build a table row
+
+  # build base sqlite SELECT call
+  sqlq="SELECT * FROM ${table} WHERE "
+
+  # add WHERE clause(s)
+  wherec=""
+  for kv_pair in ${query[@]}; do
+    # split one pair to the two arrays
+    spl=( $(split2array "${kv_pair}" "=") )
+    # add to both arrays
+    wherec="${wherec} AND ${spl[0]}=${d}${spl[1]}${d}"
+  done
+
+  # concatenate run and return count
+  sqlq=${sqlq}${wherec# AND }
+  cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${s}${sqlq}${s};"
+  # echo "# ${cmd}"
+  eval "${cmd}"
+}
 
 #--------------------------------------------------------------------------------------
 # add rows to table

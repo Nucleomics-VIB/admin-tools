@@ -50,6 +50,9 @@ shift $(( OPTIND - 1 ))
 q="'"
 d='"'
 
+# create backups folder for DB copies
+mkdir -p backups
+
 # source shared functions from the shared subfolder
 if [[ -f "shared/custom_functions.sh" ]]
 then

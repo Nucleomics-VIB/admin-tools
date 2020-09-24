@@ -19,7 +19,7 @@ creatorversion=${actionversion}
 
 # default values
 protection=0
-status="done"
+status=""
 deliverydate=""
 comment=""
 
@@ -131,6 +131,7 @@ for platform in ${targets[*]}; do
     RunNr, 
     FlowCellID, 
     ProjectNR, 
+    Status, 
     DeliveryDate, 
     Comment
     ) 
@@ -148,6 +149,7 @@ for platform in ${targets[*]}; do
     \"${runnum}\", 
     \"${flowcellid}\", 
     \"${projnum}\", 
+    \"${status}\", 
     \"${deliverydate}\", 
     \"${comment}\"
     );"
