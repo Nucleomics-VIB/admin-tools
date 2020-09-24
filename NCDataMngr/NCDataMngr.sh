@@ -54,12 +54,12 @@ d='"'
 mkdir -p backups
 
 # source shared functions from the shared subfolder
-if [[ -f "shared/custom_functions.sh" ]]
+if [[ -f "shared/*_functions.sh" ]]
 then
-	. shared/custom_functions.sh
+	. shared/*_functions.sh
 	# echo "# custom_functions were sourced"
 else
-	echo "# custom_functions.sh not found in shared/"
+	echo "# *_functions.sh not found in shared/"
 	exit 1
 fi
 
