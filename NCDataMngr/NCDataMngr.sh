@@ -55,7 +55,7 @@ mkdir -p backups
 
 # source shared functions from the shared subfolder
 [[ -n $(find shared -maxdepth 1 -type f -name '*_functions.sh') ]] \
-	&& . shared/*_functions.sh \
+	&& { for f in shared/*_functions.sh; do . $f; done; } \
 	|| { echo "# *_functions.sh not found in shared/"; exit 1; }
 
 # read yaml configuration and process it
