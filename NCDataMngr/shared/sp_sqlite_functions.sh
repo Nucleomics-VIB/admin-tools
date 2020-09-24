@@ -115,7 +115,9 @@ function Querytable2Count {
   table=$1
   shift
   query=( $@ ); # an array of value pairs field=value to build a table row
-
+  q="'"
+  d='"'
+  
   # build base sqlite SELECT call
   sqlq="SELECT COUNT(*) FROM ${table} WHERE "
 
@@ -130,7 +132,7 @@ function Querytable2Count {
 
   # concatenate run and return count
   sqlq=${sqlq}${wherec# AND }
-  cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${s}${sqlq}${s};"
+  cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${q}${sqlq}${q};"
   # echo "# ${cmd}"
   eval "${cmd}"
 }
@@ -147,7 +149,9 @@ function Querytable2Data {
   table=$1
   shift
   query=( $@ ); # an array of value pairs field=value to build a table row
-
+  q="'"
+  d='"'
+  
   # build base sqlite SELECT call
   sqlq="SELECT * FROM ${table} WHERE "
 
@@ -162,7 +166,7 @@ function Querytable2Data {
 
   # concatenate run and return count
   sqlq=${sqlq}${wherec# AND }
-  cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${s}${sqlq}${s};"
+  cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${q}${sqlq}${q};"
   # echo "# ${cmd}"
   eval "${cmd}"
 }

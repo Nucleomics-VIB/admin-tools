@@ -17,6 +17,8 @@ AddIlluminaFolders:
   usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Illumina Run folders (identified by their name eg. 190807_7001450_0488_AH3HVFBCX3_exp3209)
 AddIlluminaFolders2:
   usage: Same as version 1 but using a sqlite script
+AddIlluminaFolders3:
+  usage: Same as version 1&2 but using a sqlite script and only new records
 UpdateFolderSize:
   usage: Adds or changes the size of a folder based on the data present in the DUC database
 UpdateStatus:
