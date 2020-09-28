@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# script: AddIlluminaFolders
-action="AddPacbioFolders"
+# script: AddGridIonFolders
+action="AddGridIonFolders"
 actionversion="1.0; 2020-09-28"
 #
 # aim: add/update records in the database for all Illumina Folders found in
@@ -55,13 +55,14 @@ databasename=${CONF_database_name}
 databasedump=${CONF_database_dump}
 mountpoint=${CONF_mount_point}
 mountpath=${CONF_mount_path}
-platform=${CONF_pacbio_sequel}
+platform=${CONF_ont_gridion}
+deviceid=${CONF_ont_gridionid}
 
 # date-tag
 actiondate=$(date +%s); # seconds since 1970-01-01
 
-# find proper PacBio run folders matching r54094_YYYYMMDD_HHMMSS
-  runfolders=$(find ${mountpoint}/${mountpath}/${platform} -maxdepth 2 -type d -regex ".*/r54094_[0-9]*_[0-9]*" | sort -h)
+# find proper PacBio run folders matching 20190730_1356_GA20000_FAJ17947_9bdb0878_exp3166
+  runfolders=$(find ${mountpoint}/${mountpath}/${platform} -maxdepth 2 -type d -regex ".*/[0-9]*_[0-9]*_[A-Z0-9]*_[A-Z0-9]*_[a-z0-9]*.*" | sort -h)
 
   for runf in ${runfolders[*]}; do
     >&2 echo -n "procesing ${runf}: "
@@ -78,12 +79,12 @@ actiondate=$(date +%s); # seconds since 1970-01-01
     # decompose folder name into variables
     # eg: 190807_7001450_0488_AH3HVFBCX3_exp3209
     array=(${foldername//_/ })
-    deviceid=${array[0]}
-    rdate=${array[1]}
-    rtime=${array[2]}
-    runnum=""
-    flowcellid=""
-    projnum=""
+    rdate=${array[0]}
+    rtime=${array[1]}
+    position=${array[2]:-""}
+    flowcellid=${array[3]}
+    runnum=${array[4]:-""}
+    projnum=${array[5]:-""}
     deliverydate=""
 
     # get folder size from DUC (several possible ways based on ${CONF_duc_access} !)
@@ -112,7 +113,7 @@ actiondate=$(date +%s); # seconds since 1970-01-01
 #     echo "# FolderSize:     ${foldersize}"
 #     echo "# Protection:     ${protection}"
 #     echo "# DeviceModel:    ${platform}"
-#     echo "# RunDate:        ${rdate}"
+#     echo "# RunDate:        ${rdate}_${rtime}"
 #     echo "# DeviceID:       ${deviceid}"
 #     echo "# RunNr:          ${runnum}"
 #     echo "# FlowCellID:     ${flowcellid}"
@@ -155,7 +156,7 @@ VALUES (
   ${d}${foldername}${d}, 
   ${d}${foldersize}${d}, 
   ${d}${protection}${d}, 
-  ${d}${platform}${d}, 
+  ${d}${platform}_${position}${d}, 
   ${d}${rdate}_${rtime}${d}, 
   ${d}${deviceid}${d}, 
   ${d}${runnum}${d}, 
