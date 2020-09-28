@@ -1,14 +1,15 @@
 #!/bin/bash
 
-# script: AddIlluminaFolders2
-action="AddIlluminaFolders2"
-actionversion="1.0; 2020-09-11"
+# script: AddIlluminaFolders
+action="AddPacbioFolders"
+actionversion="1.0; 2020-09-28"
 #
 # aim: add/update records in the database for all Illumina Folders found in
 # ${CONF_mount_point}/${CONF_mount_path}
 # default folders from  ${CONF_illumina_folderarray}
 #
 # NOTE: will only scan one level and valid folders based on their name
+# NEW in this version first checks if a folder is new before adding it
 
 ########################################################################
 # Edit here if necessary
@@ -33,20 +34,6 @@ lts=$(date -r ${ts})
 # then source it with :
 #   sqlite3 "${databasepath}/${databasename}" ".read tmp/cmd_${timestamp}.sql"
 
-# array of folders to scan with default to: ${CONF_illumina_folderarray}
-case ${my_vars[@]} in
-  "")
-    targets=(${CONF_illumina_folderarray});;
-    
-  targets)
-    good=1;;
-  *) 
-    echo "# invalid argument ${v}"
-    echo "should be '-p targets=<Folder>' or '-p targets=(<F1> <F2> <F3>)'"
-    exit 1
-esac
-
-
 mkdir -p tmp
 
 # write script file header
@@ -63,48 +50,41 @@ PRAGMA foreign_keys = false;
 ' > tmp/cmd_${ts}.sql
 
 # sqlite3 variables
-databasepath=$CONF_database_path
-databasename=$CONF_database_name
-databasedump=$CONF_database_dump
-mountpoint=$CONF_mount_point
-mountpath=$CONF_mount_path
+databasepath=${CONF_database_path}
+databasename=${CONF_database_name}
+databasedump=${CONF_database_dump}
+mountpoint=${CONF_mount_point}
+mountpath=${CONF_mount_path}
+platform=${CONF_pacbio_sequel}
 
 # date-tag
 actiondate=$(date +%s); # seconds since 1970-01-01
 
-# repeat for all target folder
-
-# convert CONF_illumina_folderarray to bash array
-read -a allowed <<< ${CONF_illumina_folderarray}
-
-for platform in ${targets[*]}; do
-  # check if valid platform (present in ${CONF_illumina_folderarray} )
-  inArray "${platform}" "${allowed[@]}" || \
-    { echo "-- ${platform} is not a valid target"; exit 1; }
-  
-
-# find proper Illumina run folders starting with 19 or 20 (year)
-  runfolders=$(find ${mountpoint}/${mountpath}/${platform} -type d -maxdepth 1 \
-    | grep "^${mountpoint}/${mountpath}/${platform}/[12]")
+# find proper PacBio run folders matching r54094_YYYYMMDD_HHMMSS
+  runfolders=$(find ${mountpoint}/${mountpath}/${platform} -type d -maxdepth 2 -regex ".*/r54094_[0-9]*_[0-9]*")
 
   for runf in ${runfolders[*]}; do
-    >&2 echo "procesing ${runf}"
+    >&2 echo -n "procesing ${runf}: "
     
     foldername=$(basename ${runf})
     folderpath="${mountpath}/${platform}"
   
+    # check if the row already exists
+    count=$(Querytable2Count Folders FolderPath=${folderpath} FolderName=${foldername})
+    [ "${count}" -eq 0 ] \
+    	&& { echo "adding to the DB"; } \
+    	|| { echo "already in the DB, passing"; continue; }
+  
     # decompose folder name into variables
     # eg: 190807_7001450_0488_AH3HVFBCX3_exp3209
     array=(${foldername//_/ })
-    rdate=${array[0]}
-    deviceid=${array[1]}
-    runnum=${array[2]}
-    flowcellid=${array[3]}
-    projnum=${array[4]}
+    deviceid=${array[0]}
+    rdate=${array[1]}
+    rtime=${array[2]}
+    runnum=""
+    flowcellid=""
+    projnum=""
     deliverydate=""
-    
-    # restrict to last 6 digits as some folders have longer date strings YYYY io YY
-    rdate="${rdate: -6}"
 
     # get folder size from DUC (several possible ways based on ${CONF_duc_access} !)
     case ${CONF_duc_access} in
@@ -216,15 +196,13 @@ END_BLOCK
 
   done
 
-done
-
 # write FOOTER in file
 echo "PRAGMA foreign_keys = false;" >> tmp/cmd_${ts}.sql
 
 # execute file and cleanup
 cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${d}.read ${CONF_database_path}/tmp/cmd_${ts}.sql${d};"
 # echo "# ${cmd}"
-eval ${cmd} \
+#eval ${cmd} \
 # && rm tmp/cmd_${ts}.sql
 
 exit 0

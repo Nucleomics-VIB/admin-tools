@@ -2,7 +2,7 @@
 
 # script: UpdateFolderSize
 action="UpdateFolderSize"
-actionversion=" 1.0; 2020-09-11"
+actionversion="1.0; 2020-09-11"
 #
 # aim: add or change FolderSize for a given FolderName based on current DUC info
 

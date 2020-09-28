@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# script: AddIlluminaFolders2
-action="AddIlluminaFolders2"
-actionversion=" 1.0; 2020-09-11"
+# script: AddIlluminaFolders3
+action="AddIlluminaFolders3"
+actionversion="1.0; 2020-09-11"
 #
 # aim: add/update records in the database for all Illumina Folders found in
 # ${CONF_mount_point}/${CONF_mount_path}
