@@ -27,7 +27,7 @@ AddPacbioFolders:
 UpdateFolderSize:
   usage: Adds or changes the size of a folder based on the data present in the DUC database
 UpdateStatus:
-  usage: Changes the status of a Folder record with one of the choices from 'allowed_status.yam'
+  usage: Changes the status of a Folder record with one of the choices from 'allowed_status.yaml'
 ChangeProtection:
   usage: Changes the protection status of a Folder record (value can be 0 for unprotected or 1 for protected)
 TransferFolder:
