@@ -56,20 +56,22 @@ databasedump=${CONF_database_dump}
 mountpoint=${CONF_mount_point}
 mountpath=${CONF_mount_path}
 platform=${CONF_ont_gridion}
-deviceid=${CONF_ont_gridionid}
 
 # date-tag
 actiondate=$(date +%s); # seconds since 1970-01-01
 
 # find proper PacBio run folders matching 20190730_1356_GA20000_FAJ17947_9bdb0878_exp3166
-  runfolders=$(find ${mountpoint}/${mountpath}/${platform} -maxdepth 2 -type d -regex ".*/[0-9]*_[0-9]*_[A-Z0-9]*_[A-Z0-9]*_[a-z0-9]*.*" | sort -h)
+  runfolders=$(find ${mountpoint}/${mountpath}/${platform} -mindepth 2 -maxdepth 2 -type d -regex ".*/[0-9]*_[0-9]*_[A-Z0-9]*_[A-Z0-9]*_[a-z0-9]*.*" | sort -h)
 
   for runf in ${runfolders[*]}; do
     >&2 echo -n "procesing ${runf}: "
     
     foldername=$(basename ${runf})
-    folderpath="${mountpath}/${platform}"
-  
+    folderpath=$(dirname ${runf})
+    folderpath=${folderpath#${mountpoint}/}
+    # reset to default when changed by last loop
+    platform=${CONF_ont_gridion}
+
     # check if the row already exists
     count=$(Querytable2Count Folders FolderPath=${folderpath} FolderName=${foldername})
     [ "${count}" -eq 0 ] \
@@ -77,15 +79,27 @@ actiondate=$(date +%s); # seconds since 1970-01-01
     	|| { echo "already in the DB, passing"; continue; }
   
     # decompose folder name into variables
-    # eg: 190807_7001450_0488_AH3HVFBCX3_exp3209
+    # eg MinIon:  20170824_1308_MN17294_FAH23035_na_exp2741
+    # eg gridIon: 20190627_1343_GA50000_FAH81691_667917f3_exp3201.1-2
     array=(${foldername//_/ })
     rdate=${array[0]}
     rtime=${array[1]}
-    position=${array[2]:-""}
+    position=${array[2]}
     flowcellid=${array[3]}
-    runnum=${array[4]:-""}
-    projnum=${array[5]:-""}
+    runnum=${array[4]}
+    projnum=${array[5]}
     deliverydate=""
+
+    # link gridIon device by date
+    # device change end 2019-10-16 from GXB01104 to GXB02041
+    if [ ${rdate} -lt 20191016 ]; then
+      deviceid=${CONF_ont_gridionid1}
+    else
+      deviceid=${CONF_ont_gridionid2}
+    fi
+
+    # handle Minion run where position is of the kind: MN[0-9]*
+    stringContains "MN[0-9]*" ${position} && { platform="Minion"; deviceid=${position}; position="na"; }
 
     # get folder size from DUC (several possible ways based on ${CONF_duc_access} !)
     case ${CONF_duc_access} in
@@ -203,7 +217,7 @@ echo "PRAGMA foreign_keys = false;" >> tmp/cmd_${ts}.sql
 # execute file and cleanup
 cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${d}.read ${CONF_database_path}/tmp/cmd_${ts}.sql${d};"
 # echo "# ${cmd}"
-#eval ${cmd} \
-# && rm tmp/cmd_${ts}.sql
+eval ${cmd} \
+ && rm tmp/cmd_${ts}.sql
 
 exit 0

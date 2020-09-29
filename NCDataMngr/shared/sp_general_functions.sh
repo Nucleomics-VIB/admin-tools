@@ -70,6 +70,31 @@ function listactions {
 }
 
 
+# --------------------------------------------------------------------------------------
+# checks if a string congtains a substring
+# from: https://stackoverflow.com/questions/
+#       229551/how-to-check-if-a-string-contains-a-substring-in-bash
+# usage:
+#    stringContains "MN[0-9]*" ${position} && { 
+#      platform="Minion"
+#      deviceid=${position}
+#      position="na"; }
+# ==> do not forget space after '{' and '; ' before '}'
+
+function stringContains {
+  reqsubstr="$1"
+  shift
+  string="$@"
+  if [ -z "${string##*$reqsubstr*}" ] ;then
+    # echo "String '$string' contain substring: '$reqsubstr'.";
+    return 0
+  else
+    # echo "String '$string' does not contain substring: '$reqsubstr'."
+    return 1
+  fi
+}
+
+
 #--------------------------------------------------------------------------------------
 # join array elements with separator given as $1
 #  usage_1 join_by ',' ${array[@]}

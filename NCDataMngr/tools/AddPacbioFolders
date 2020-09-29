@@ -60,15 +60,16 @@ platform=${CONF_pacbio_sequel}
 # date-tag
 actiondate=$(date +%s); # seconds since 1970-01-01
 
-# find proper PacBio run folders matching r54094_YYYYMMDD_HHMMSS
-  runfolders=$(find ${mountpoint}/${mountpath}/${platform} -maxdepth 2 -type d -regex ".*/r54094_[0-9]*_[0-9]*" | sort -h)
+# find proper PacBio run folders matching r54094_YYYYMMDD_HHMMSS_expXXXX
+  runfolders=$(find ${mountpoint}/${mountpath}/${platform} -mindepth 2 -maxdepth 2 -type d -regex ".*/r54094_[0-9]*_[0-9]*.*" | sort -h)
 
   for runf in ${runfolders[*]}; do
     >&2 echo -n "procesing ${runf}: "
     
     foldername=$(basename ${runf})
-    folderpath="${mountpath}/${platform}"
-  
+    folderpath=$(dirname ${runf})
+    folderpath=${folderpath#${mountpoint}/}
+
     # check if the row already exists
     count=$(Querytable2Count Folders FolderPath=${folderpath} FolderName=${foldername})
     [ "${count}" -eq 0 ] \
@@ -76,14 +77,14 @@ actiondate=$(date +%s); # seconds since 1970-01-01
     	|| { echo "already in the DB, passing"; continue; }
   
     # decompose folder name into variables
-    # eg: 190807_7001450_0488_AH3HVFBCX3_exp3209
+    # eg: r54094_YYYYMMDD_HHMMSS_expXXXX
     array=(${foldername//_/ })
     deviceid=${array[0]}
     rdate=${array[1]}
     rtime=${array[2]}
+    projnum=${array[3]}
     runnum=""
     flowcellid=""
-    projnum=""
     deliverydate=""
 
     # get folder size from DUC (several possible ways based on ${CONF_duc_access} !)
@@ -202,7 +203,7 @@ echo "PRAGMA foreign_keys = false;" >> tmp/cmd_${ts}.sql
 # execute file and cleanup
 cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${d}.read ${CONF_database_path}/tmp/cmd_${ts}.sql${d};"
 # echo "# ${cmd}"
-#eval ${cmd} \
+eval ${cmd} \
 # && rm tmp/cmd_${ts}.sql
 
 exit 0
