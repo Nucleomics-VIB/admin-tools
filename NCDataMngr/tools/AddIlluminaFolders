@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# script: AddIlluminaFolders
-action="AddIlluminaFolders"
+# script: AddIlluminaFolders3
+action="AddIlluminaFolders3"
 actionversion="1.0; 2020-09-11"
 #
 # aim: add/update records in the database for all Illumina Folders found in
@@ -9,6 +9,7 @@ actionversion="1.0; 2020-09-11"
 # default folders from  ${CONF_illumina_folderarray}
 #
 # NOTE: will only scan one level and valid folders based on their name
+# NEW in this version first checks if a folder is new before adding it
 
 ########################################################################
 # Edit here if necessary
@@ -19,11 +20,19 @@ creatorversion=${actionversion}
 
 # default values
 protection=0
-status=""
+status="done"
 deliverydate=""
 comment=""
 
+# timestamp for tmp file
+ts=$(date +%s)
+lts=$(date -r ${ts})
+
 ####################### no edits below this line #######################
+
+# create a sql script file tmp/cmd_${timestamp}.sql with all commands
+# then source it with :
+#   sqlite3 "${databasepath}/${databasename}" ".read tmp/cmd_${timestamp}.sql"
 
 # array of folders to scan with default to: ${CONF_illumina_folderarray}
 case ${my_vars[@]} in
@@ -37,6 +46,22 @@ case ${my_vars[@]} in
     echo "should be '-p targets=<Folder>' or '-p targets=(<F1> <F2> <F3>)'"
     exit 1
 esac
+
+
+mkdir -p tmp
+
+# write script file header
+echo '/*
+------------------------------------------------------------------
+written by '${action}'
+date: '${lts}'
+ts: '${ts}'
+------------------------------------------------------------------
+*/
+
+PRAGMA foreign_keys = false;
+
+' > tmp/cmd_${ts}.sql
 
 # sqlite3 variables
 databasepath=$CONF_database_path
@@ -56,7 +81,7 @@ read -a allowed <<< ${CONF_illumina_folderarray}
 for platform in ${targets[*]}; do
   # check if valid platform (present in ${CONF_illumina_folderarray} )
   inArray "${platform}" "${allowed[@]}" || \
-    { echo "# ${platform} is not a valid target"; exit 1; }
+    { echo "-- ${platform} is not a valid target"; exit 1; }
   
 
 # find proper Illumina run folders starting with 19 or 20 (year)
@@ -64,9 +89,16 @@ for platform in ${targets[*]}; do
     | grep "^${mountpoint}/${mountpath}/${platform}/[12]")
 
   for runf in ${runfolders[*]}; do
-
+    >&2 echo -n "procesing ${runf}: "
+    
     foldername=$(basename ${runf})
     folderpath="${mountpath}/${platform}"
+  
+    # check if the row already exists
+    count=$(Querytable2Count Folders FolderPath=${folderpath} FolderName=${foldername})
+    [ "${count}" -eq 0 ] \
+    	&& { echo "adding to the DB"; } \
+    	|| { echo "already in the DB, passing"; continue; }
   
     # decompose folder name into variables
     # eg: 190807_7001450_0488_AH3HVFBCX3_exp3209
@@ -93,7 +125,7 @@ for platform in ${targets[*]}; do
         foldersize=$(get_folder_size_nuc4 "${mountpath}/${platform}/${foldername}")
         ;;
       *)
-        echo "invalid CONF_duc_access options: ${CONF_duc_access} in run_config.yaml"
+        >&2 echo "invalid CONF_duc_access options: ${CONF_duc_access} in run_config.yaml"
         exit 1
     esac
 
@@ -115,79 +147,91 @@ for platform in ${targets[*]}; do
 #     echo "# Comment:        ${comment}"
 #     echo "#--------------------------------------"
 
-echo "# processing: ${mountpath}/${platform}/${foldername}"
-
   # write to existing database ${sqlitedbpath}
-  sqlite3 "${databasepath}/${databasename}" "INSERT OR IGNORE INTO Folders 
-    (
-    Creator, 
-    CreatorVersion, 
-    DBAddDate, 
-    FolderPath, 
-    FolderName, 
-    FolderSize, 
-    Protection, 
-    DeviceModel, 
-    StartDate, 
-    DeviceID, 
-    RunNr, 
-    FlowCellID, 
-    ProjectNR, 
-    Status, 
-    DeliveryDate, 
-    Comment
-    ) 
-  VALUES (
-    \"${creator}\", 
-    \"${creatorversion}\", 
-    \"${actiondate}\", 
-    \"${folderpath}\", 
-    \"${foldername}\", 
-    \"${foldersize}\", 
-    \"${protection}\", 
-    \"${platform}\", 
-    \"${rdate}\", 
-    \"${deviceid}\", 
-    \"${runnum}\", 
-    \"${flowcellid}\", 
-    \"${projnum}\", 
-    \"${status}\", 
-    \"${deliverydate}\", 
-    \"${comment}\"
-    );"
+  cat << END_BLOCK >> tmp/cmd_${ts}.sql
+/*
+------------------------------------------------------------------
+adding data in Folders for '${folderpath}/${foldername}
+------------------------------------------------------------------
+*/
 
-  # store the action in Actions only when record was written to Folders
-  if [ $? -eq 0 ]; then
+INSERT OR IGNORE INTO Folders 
+  (
+  Creator, 
+  CreatorVersion, 
+  DBAddDate, 
+  FolderPath, 
+  FolderName, 
+  FolderSize, 
+  Protection, 
+  DeviceModel, 
+  StartDate, 
+  DeviceID, 
+  RunNr, 
+  FlowCellID, 
+  ProjectNR, 
+  Status, 
+  DeliveryDate, 
+  Comment
+  )
+VALUES (
+  ${d}${creator}${d}, 
+  ${d}${creatorversion}${d}, 
+  ${d}${actiondate}${d}, 
+  ${d}${folderpath}${d}, 
+  ${d}${foldername}${d}, 
+  ${d}${foldersize}${d}, 
+  ${d}${protection}${d}, 
+  ${d}${platform}${d}, 
+  ${d}${rdate}${d}, 
+  ${d}${deviceid}${d}, 
+  ${d}${runnum}${d}, 
+  ${d}${flowcellid}${d}, 
+  ${d}${projnum}${d}, 
+  ${d}${status}${d}, 
+  ${d}${deliverydate}${d}, 
+  ${d}${comment}${d}
+  );
 
-    # get ID of the record just been created
-    currentFolderID=$(sqlite3 "${databasepath}/${databasename}" "SELECT FolderID
-    FROM Folders ORDER BY FolderID DESC LIMIT 1;")
+/*
+------------------------------------------------------------------
+adding data in Actions for ${folderpath}/${foldername}
+------------------------------------------------------------------
+*/
 
-    #echo "# key for join: ${currentFolderID}; now writing in the Actions table"
+INSERT OR IGNORE INTO Actions 
+  (
+  FolderID,
+  Creator, 
+  CreatorVersion, 
+  ActionDate, 
+  ActionName, 
+  Comment
+  )
+VALUES (
+  last_insert_rowid(),
+  ${d}${creator}${d}, 
+  ${d}${creatorversion}${d}, 
+  ${d}${actiondate}${d}, 
+  ${d}${action}${d}, 
+  ${d}${comment}${d}
+  );
 
-    # insert in related table using ${currentFolderID}
-    sqlite3 "${databasepath}/${databasename}" "INSERT OR IGNORE INTO Actions 
-      (
-      FolderID, 
-      Creator, 
-      CreatorVersion, 
-      ActionDate, 
-      ActionName, 
-      Comment
-      ) 
-    VALUES (
-      \"${currentFolderID}\", 
-      \"${creator}\", 
-      \"${creatorversion}\", 
-      \"${actiondate}\", 
-      \"${action}\", 
-      \"${comment}\"
-      );"
-    # echo "#--------------------------------------"
-    
-    fi
+-- ----------------------------------------------------------------
 
+END_BLOCK
 
   done
 
 done
+
+# write FOOTER in file
+echo "PRAGMA foreign_keys = false;" >> tmp/cmd_${ts}.sql
+
+# execute file and cleanup
+cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${d}.read ${CONF_database_path}/tmp/cmd_${ts}.sql${d};"
+# echo "# ${cmd}"
+eval ${cmd} \
+# && rm tmp/cmd_${ts}.sql
+
+exit 0

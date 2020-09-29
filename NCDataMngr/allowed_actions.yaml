@@ -18,9 +18,9 @@ AddGridIonFolders:
 
 AddIlluminaFolders:
   usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Illumina Run folders (identified by their name eg. 190807_7001450_0488_AH3HVFBCX3_exp3209)
-AddIlluminaFolders2:
+AddIlluminaFolders_beta1:
   usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Illumina Run folders (identified by their name eg. 190807_7001450_0488_AH3HVFBCX3_exp3209)
-AddIlluminaFolders3:
+AddIlluminaFolders_beta2:
   usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Illumina Run folders (identified by their name eg. 190807_7001450_0488_AH3HVFBCX3_exp3209)
 AddPacbioFolders:
   usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Pacbio Run folders (identified by their name: r54094_YYYYMMDD_HHMMSS)
