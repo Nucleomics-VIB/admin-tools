@@ -86,6 +86,8 @@ actiondate=$(date +%s); # seconds since 1970-01-01
     # eg gridIon: 20190627_1343_GA50000_FAH81691_667917f3_exp3201.1-2
     array=(${foldername//_/ })
     rdate=${array[0]}
+    # keep only YYMMDD
+    rdate=${rdate:2:6}
     rtime=${array[1]}
     position=${array[2]}
     flowcellid=${array[3]}
@@ -159,7 +161,7 @@ VALUES (
   ${d}${foldersize}${d}, 
   ${d}${protection}${d}, 
   ${d}${platform}_${position}${d}, 
-  ${d}${rdate}_${rtime}${d}, 
+  ${d}${rdate}${d}, 
   ${d}${deviceid}${d}, 
   ${d}${runnum}${d}, 
   ${d}${flowcellid}${d}, 

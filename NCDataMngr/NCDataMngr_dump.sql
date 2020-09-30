@@ -72,7 +72,6 @@ CREATE TABLE "version" (
 	 "vdate" text
 );
 INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("version", '0');
-INSERT INTO "version" (vnum, vdate) VALUES ("1.1", "2020-09-23");
 
 -- ----------------------------
 --  View structure for ActionView
@@ -99,6 +98,7 @@ FROM
 Folders
 ORDER BY
 Folders.FolderID ASC;
+
 
 -- ----------------------------
 --  Indexes structure for table Folders

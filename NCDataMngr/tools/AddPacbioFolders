@@ -81,6 +81,8 @@ actiondate=$(date +%s); # seconds since 1970-01-01
     array=(${foldername//_/ })
     deviceid=${array[0]}
     rdate=${array[1]}
+    # keep only YYMMDD
+    rdate=${rdate:2:6}
     rtime=${array[2]}
     projnum=${array[3]}
     runnum=""
@@ -157,7 +159,7 @@ VALUES (
   ${d}${foldersize}${d}, 
   ${d}${protection}${d}, 
   ${d}${platform}${d}, 
-  ${d}${rdate}_${rtime}${d}, 
+  ${d}${rdate}${d}, 
   ${d}${deviceid}${d}, 
   ${d}${runnum}${d}, 
   ${d}${flowcellid}${d}, 

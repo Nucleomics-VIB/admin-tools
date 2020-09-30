@@ -11,6 +11,9 @@ actionversion="1.0; 2020-09-11"
 ########################################################################
 # Edit here if necessary
 
+dbversion="1.1"
+dbcreatedate=$(date)
+
 ####################### no edits below this line #######################
 
 # sqlite3 variables
@@ -37,6 +40,9 @@ else
 	# check for success
 	if [ $? -eq 0 ]; then
 		echo "# database ${databasename} was created in ${databasepath}"
+		cmd="sqlite3 ${CONF_database_path}/${CONF_database_name} ${q}INSERT INTO version (vnum, vdate) VALUES (${d}${dbversion}${d}, ${d}${dbcreatedate}${d})${q};"
+		# echo "# ${cmd}"
+		eval ${cmd}
 	else
 		echo "# failed to create the database"
 		exit 1
