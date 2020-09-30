@@ -78,7 +78,7 @@ function get_folder_size_nuc1() # get folder size from DUC from Nuc1 (via ssh)
   ducdb="/opt/tools/duc/nuc_transfer.db"
   mountpoint="/mnt/nuc-transfer"
   folderpath=${1}
-  # echo "${mountpoint}/${folderpath}"
+  # >&2 echo "${mountpoint}/${folderpath}"
   size=$(ssh ${sshhost} '/opt/tools/duc/duc4 ls -D -b -d '${ducdb} ${mountpoint}/${folderpath}' | \
     cut -d " " -f 1')
   echo ${size:-0} 

@@ -90,7 +90,7 @@ for platform in ${targets[*]}; do
     | grep "^${mountpoint}/${mountpath}/${platform}/[12]")
 
   for runf in ${runfolders[*]}; do
-    >&2 echo -n "procesing ${runf}: "
+    >&2 echo -n "processing ${runf}: "
     
     foldername=$(basename ${runf})
     folderpath="${mountpath}/${platform}"
@@ -98,8 +98,8 @@ for platform in ${targets[*]}; do
     # check if the row already exists
     count=$(Querytable2Count Folders FolderPath=${folderpath} FolderName=${foldername})
     [ "${count}" -eq 0 ] \
-    	&& { echo "adding to the DB"; } \
-    	|| { echo "already in the DB, passing"; continue; }
+    	&& { >&2 echo " | adding to the DB: "; } \
+    	|| { >&2 echo "already in the DB, passing"; continue; }
   
     # decompose folder name into variables
     # eg: 190807_7001450_0488_AH3HVFBCX3_exp3209

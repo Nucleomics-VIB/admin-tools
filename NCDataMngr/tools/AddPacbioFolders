@@ -64,7 +64,7 @@ actiondate=$(date +%s); # seconds since 1970-01-01
   runfolders=$(find ${mountpoint}/${mountpath}/${platform} -mindepth 2 -maxdepth 2 -type d -regex ".*/r54094_[0-9]*_[0-9]*.*" | sort -h)
 
   for runf in ${runfolders[*]}; do
-    >&2 echo -n "procesing ${runf}: "
+    >&2 echo -n "processing ${runf}: "
     
     foldername=$(basename ${runf})
     folderpath=$(dirname ${runf})
@@ -73,8 +73,8 @@ actiondate=$(date +%s); # seconds since 1970-01-01
     # check if the row already exists
     count=$(Querytable2Count Folders FolderPath=${folderpath} FolderName=${foldername})
     [ "${count}" -eq 0 ] \
-    	&& { echo "adding to the DB"; } \
-    	|| { echo "already in the DB, passing"; continue; }
+    	&& { >&2 echo " | adding to the DB: "; } \
+    	|| { >&2 echo "already in the DB, passing"; continue; }
   
     # decompose folder name into variables
     # eg: r54094_YYYYMMDD_HHMMSS_expXXXX
@@ -90,13 +90,13 @@ actiondate=$(date +%s); # seconds since 1970-01-01
     # get folder size from DUC (several possible ways based on ${CONF_duc_access} !)
     case ${CONF_duc_access} in
       nuc1local)
-        foldersize=$(get_folder_size_local "${mountpath}/${platform}/${foldername}")
+        foldersize=$(get_folder_size_local "${folderpath}/${foldername}")
         ;;
       nuc1ssh)
-        foldersize=$(get_folder_size_nuc1 "${mountpath}/${platform}/${foldername}")
+        foldersize=$(get_folder_size_nuc1 "${folderpath}/${foldername}")
         ;;
       nuc4ssh)
-        foldersize=$(get_folder_size_nuc4 "${mountpath}/${platform}/${foldername}")
+        foldersize=$(get_folder_size_nuc4 "${folderpath}/${foldername}")
         ;;
       *)
         >&2 echo "invalid CONF_duc_access options: ${CONF_duc_access} in run_config.yaml"
