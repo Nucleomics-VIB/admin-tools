@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# script: ListOptions
+action="ListFunctions"
+actionversion="1.0; 2020-09-30"
+#
+# aim: list the custom functions  present in *_functions.sh files in /shared
+
+########################################################################
+# Edit here if necessary
+
+####################### no edits below this line #######################
+
+echo "#################################################"
+echo "# List of custom functions defined shared/*.sh  #"
+echo "#################################################"
+echo "version: ${actionversion}"
+echo 
+while read funfile; do
+echo "# custom functions in ${funfile}:"
+echo
+grep "^function" ${funfile} | sed -e 's/^function /- /'
+echo
+echo "-------------------------------------------------------------------------------"
+done < <(find shared -mindepth 1 -maxdepth 1 -type f -name "*_functions.sh")

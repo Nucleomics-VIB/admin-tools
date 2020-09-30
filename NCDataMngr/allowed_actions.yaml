@@ -5,6 +5,8 @@
 
 ActionDemo:
   usage: Shows a simple example for passing variables to an Action script
+ListFunctions:
+  usage: list custom functions in shared/*_functions.sh files
 ShareStatus:
   usage: Shows the current usage of the share defined in 'run_config.yaml' as '${CONF_mount_point}/${CONF_mount_path}'; adding '-p <subfolder>' allows going deeper (eg -p NovaSeq6000)
 DBListFields:

@@ -24,7 +24,8 @@
 # test that you can access the DUC server via ssh (from the KUL or from home with Pulse)
 
 
-function test_duc_ssh {
+function test_duc_ssh() # test DUC access (nuc1local|nuc1ssh|nuc4ssh)
+{
   case ${CONF_duc_access} in
     nuc1local)
       return 0
@@ -56,7 +57,8 @@ function test_duc_ssh {
 # get folder size from DUC on the local machine (Nuc1)
 
 
-function get_folder_size_local {
+function get_folder_size_local() # get folder size from DUC from Nuc1 (local)
+{
   mountpoint="/mnt/nuc-transfer"
   folderpath=${1}
   size=$(duc ls -D -b \
@@ -70,7 +72,8 @@ function get_folder_size_local {
 # get folder size from DUC from Nuc1 via ssh
 
 
-function get_folder_size_nuc1 {
+function get_folder_size_nuc1() # get folder size from DUC from Nuc1 (via ssh)
+{
   sshhost="gbw-s-nuc01.luna.kuleuven.be"
   ducdb="/opt/tools/duc/nuc_transfer.db"
   mountpoint="/mnt/nuc-transfer"
@@ -86,7 +89,8 @@ function get_folder_size_nuc1 {
 # get folder size from DUC from Nuc4 via ssh (obsolete)
 
 
-function get_folder_size_nuc4 {
+function get_folder_size_nuc4() # get folder size from DUC from Nuc4 via ssh (obsolete)
+{
   sshhost="gbw-s-nuc04.luna.kuleuven.be"
   ducdb="/var/www/html/ducDB/nuc_transfer.db"
   mountpoint="/mnt/nuc-transfer"
@@ -104,16 +108,18 @@ function get_folder_size_nuc4 {
 # can be local or via ssh from nuc1
 
 
-function duc_last_update_local {
+function duc_last_update_local() # get folder size, last DUC update from Nuc1 (local)
+{
   lastupdt=$('/opt/tools/duc/duc4 info -d' ${ducdb} | tail -1 | awk '{print $1,$2}')
   echo ${lastupdt:-"na"}
 }
 
 
-function duc_last_update_nuc1 {
+function duc_last_update_nuc1() # get last DUC update from Nuc1 (via ssh)
+{
   sshhost="gbw-s-nuc01.luna.kuleuven.be"
   ducdb="/opt/tools/duc/nuc_transfer.db"
   mountpoint="/mnt/nuc-transfer"
-  lastupdt=$(ssh ${sshhost} '/opt/tools/duc/duc4 info -d '${ducdb} | tail -1 | awk '{print $1,$2})')
+  lastupdt=$(ssh ${sshhost} '/opt/tools/duc/duc4 info -d '${ducdb} | tail -1 | awk '{print $1,$2}')
   echo ${lastupdt:-"na"}
 }

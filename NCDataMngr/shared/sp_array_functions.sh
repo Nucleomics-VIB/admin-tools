@@ -15,7 +15,8 @@
 #  usage_2 join_by '|' one two "three four" 5 "a {more} : (complex) = \example"
 
 
-function join_by {
+function join_by() # join array elements with separator given as $1
+{
   sep=$1
   shift
   # join the remaining elements and remove leading ${sep}
@@ -31,7 +32,8 @@ function join_by {
 # echo $res[1] => 124
 
 
-function split2array {
+function split2array() # split string into array
+{
   input=$1
   sep=${2:-"|"}
   IFS="${sep}" read -r -a result <<< "${input}"
@@ -50,7 +52,8 @@ function split2array {
 # echo $val[0] => val1
 
 
-function pairlist2arrays {
+function pairlist2arrays() # split a list of pairs into two arrays
+{
   input=$1
   outsep=$2
   # convert argument $1 to array
@@ -71,14 +74,15 @@ function pairlist2arrays {
 
 
 #--------------------------------------------------------------------------------------
-# test if element ($1) is in array ($@) 
+# test if element '$1' is in array '$@' 
 # pass the array like -p varname='element1 element2 element3'
 
 # usage:
 # inArray "${query}" "${array[@]}" || { echo "# ${query} is not a valid element"; exit 1; }
 
 
-function inArray {
+function inArray() # test if element '$1' is in array '$@'
+{
   q=$1
   shift
   # debug: echo "# looking for $q in $@"
@@ -96,7 +100,8 @@ function inArray {
 #  14525296/how-do-i-check-if-variable-is-an-array
 
 
-function is_arr() {
+function is_arr() # test if a variable is an array
+{
   [[ ! "$1" =~ ^\$?[a-zA-Z_]+[a-zA-Z0-9_]*$ ]] && { echo "Invalid bash variable" 1>&2 ; return 1 ; }
   # the leading '$' is only used if the array is dynamic
   eval declare -p $1 2> /dev/null | grep -q '^declare \-a'; # && echo "yes" || echo "no"
@@ -109,23 +114,26 @@ function is_arr() {
 
 
 # Dynamically create an array by name
-function arr() {
+function arr() # Dynamically create an array by name
+{
   [[ ! "$1" =~ ^[a-zA-Z_]+[a-zA-Z0-9_]*$ ]] && { echo "Invalid bash variable" 1>&2 ; return 1 ; }
   # The following line can be replaced with 'declare -ag $1=\(\)'
   # Note: For some reason when using 'declare -ag $1' without the parentheses will make 'declare -p' fail
   eval $1=\(\)
 }
 
-# Insert incrementing by incrementing index eg. array+=(data)
-function arr_insert() {
+# Insert element at the end of array eg. array+=(data)
+function arr_insert() # Insert element at the end of array
+{
   [[ ! "$1" =~ ^[a-zA-Z_]+[a-zA-Z0-9_]*$ ]] && { echo "Invalid bash variable" 1>&2 ; return 1 ; }
   declare -p "$1" > /dev/null 2>&1
   [[ $? -eq 1 ]] && { echo "Bash variable [${1}] doesn't exist" 1>&2 ; return 1 ; }
   eval $1[\$\(\(\${#${1}[@]}\)\)]=\$2
 }
 
-# Update an index by position
-function arr_set() {
+# Update an index at position
+function arr_set() # replace array element by index
+{
   [[ ! "$1" =~ ^[a-zA-Z_]+[a-zA-Z0-9_]*$ ]] && { echo "Invalid bash variable" 1>&2 ; return 1 ; }
   declare -p "$1" > /dev/null 2>&1
   [[ $? -eq 1 ]] && { echo "Bash variable [${1}] doesn't exist" 1>&2 ; return 1 ; }
@@ -133,7 +141,8 @@ function arr_set() {
 }
 
 # Get the array content ${array[@]}
-function arr_get() {
+function arr_get() # get an array content
+{
   [[ ! "$1" =~ ^[a-zA-Z_]+[a-zA-Z0-9_]*$ ]] && { echo "Invalid bash variable" 1>&2 ; return 1 ; }
   declare -p "$1" > /dev/null 2>&1
   [[ $? -eq 1 ]] && { echo "Bash variable [${1}] doesn't exist" 1>&2 ; return 1 ; }
@@ -141,7 +150,8 @@ function arr_get() {
 }
 
 # Get the value stored at a specific index eg. ${array[0]}
-function arr_at() {
+function arr_at() # Get array element at specific index
+{
   [[ ! "$1" =~ ^[a-zA-Z_]+[a-zA-Z0-9_]*$ ]] && { echo "Invalid bash variable" 1>&2 ; return 1 ; }
   declare -p "$1" > /dev/null 2>&1
   [[ $? -eq 1 ]] && { echo "Bash variable [${1}] doesn't exist" 1>&2 ; return 1 ; }
@@ -157,7 +167,8 @@ function arr_at() {
 }
 
 # Get array length eg. ${#array[@]}
-function arr_count() {
+function arr_count() # get array length
+{
   [[ ! "$1" =~ ^[a-zA-Z_]+[a-zA-Z0-9_]*$ ]] && { echo "Invalid bash variable " 1>&2 ; return 1 ; }
   declare -p "$1" > /dev/null 2>&1
   [[ $? -eq 1 ]] && { echo "Bash variable [${1}] doesn't exist" 1>&2 ; return 1 ; }

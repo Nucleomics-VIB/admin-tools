@@ -15,7 +15,8 @@
 #--------------------------------------------------------------------------------------
 # get the version of the current DB
 
-function DBversion {
+function DBversion() # get the version of the current DB
+{
   cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} 'SELECT * FROM version;'"
   eval "${cmd}"
 }
@@ -25,7 +26,8 @@ function DBversion {
 # get the list of fields in a sqlite table
 # required by (addRow2Folders, addRow2Actions)
 
-function listfields {
+function listfields() # get the list of fields in a sqlite table
+{
   table=$1
   cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} 'PRAGMA table_info("${table}");'"
   eval "${cmd}" | tr "\r" "\n"
@@ -37,7 +39,8 @@ function listfields {
 # specific to csv
 
 
-function csfields {
+function csfields () # get the list of fields in a sqlite table and return csv or custom delimited-list
+{
   table=$1
   fields=()
   fieldlist=($(listfields ${table}))
@@ -53,7 +56,8 @@ function csfields {
 # list of fields with chosen separator (or ',' as default)
 
 
-function delimited_fields {
+function delimited_fields() # call csfields on table '$1' and return with specific delimiter '$2'
+{
   table=$1
   delim=${2:-","}
   fields=()
@@ -67,12 +71,11 @@ function delimited_fields {
 
 
 #--------------------------------------------------------------------------------------
-# create a new record in Folders
-# in dev not working yet
-# requires split2array
+# check if table '$1' has fields '$@' (array of field=value ...)
 
 
-function validDBFields {
+function validDBFields() # check if table '$1' has fields '$@' (array of field=value ...)
+{
   table=$1
   row=( $(echo $2) ); # an array of value pairs field=value to build a table row
 
@@ -111,7 +114,8 @@ function validDBFields {
 # the function returns the number of matching rows
 # 0 means that the row does not exist
 
-function Querytable2Count {
+function Querytable2Count() # send a query on a table + fields and return the row count
+{
   table=$1
   shift
   query=( $@ ); # an array of value pairs field=value to build a table row
@@ -145,7 +149,8 @@ function Querytable2Count {
 # obviously the fields should exist in that table
 # the function returns the full rows with | separators
 
-function Querytable2Data {
+function Querytable2Data() # send a query on a table + fields and return the filtered rows
+{
   table=$1
   shift
   query=( $@ ); # an array of value pairs field=value to build a table row
@@ -177,7 +182,8 @@ function Querytable2Data {
 
 # in dev not working yet
 
-function addRow2Table {
+function addRow2Table() # add rows to table (@work)
+{
   table=$1
   row=$2
   # parse all pairs 
@@ -201,109 +207,4 @@ function addRow2Table {
       || { echo "# ${k} is not a valid '"${table}"' field"; }
     done
   done
-}
-
-
-#--------------------------------------------------------------------------------------
-# to be deleted
-
-
-#function leftover {
-#   echo "# joining the results with comma"
-#   # do not quote the array!
-#   echo "$( join_by ',' ${ar[O]} )";   # => FolderID,Creator,BAD
-#   echo "$( join_by ',' ${ar[1]} )";   # => 100,Me,1
-# 
-# 
-#   for pair in "${row[@]}"; do
-#     # split one pair to the two arrays
-#     spl=( $(split2array ${pair} "=") )
-#     # add to both arrays
-#     k+=( ${spl[0]} )
-#     v+=( ${spl[1]} )
-#   done
-# 
-#   # debug
-#   echo "fields are ${k[@]}"
-#   echo "values are ${v[@]}"
-# 
-# 
-# 
-# 
-#   
-# 
-# exit 0
-# 
-# 
-#   # validate each user field name against the array above and stop if no match
-# 
-#   # add the row if absent based on unique fields (FolderName)
-# 
-# fieldarray="<cs-list of fields>"
-# 
-#   sqlite3 "${databasepath}/${databasename}" "INSERT INTO Folders 
-#     (
-#     Creator, 
-#     CreatorVersion, 
-#     DBAddDate, 
-#     FolderPath, 
-#     FolderName, 
-#     FolderSize, 
-#     Protection, 
-#     DeviceModel, 
-#     StartDate, 
-#     DeviceID, 
-#     RunNr, 
-#     FlowCellID, 
-#     ProjectNR, 
-#     DeliveryDate, 
-#     Comment
-#     ) 
-#   VALUES (
-#     \"${creator}\", 
-#     \"${creatorversion}\", 
-#     \"${actiondate}\", 
-#     \"${folderpath}\", 
-#     \"${foldername}\", 
-#     \"${foldersize}\", 
-#     \"${protection}\", 
-#     \"${platform}\", 
-#     \"${rdate}\", 
-#     \"${deviceid}\", 
-#     \"${runnum}\", 
-#     \"${flowcellid}\", 
-#     \"${projnum}\", 
-#     \"${deliverydate}\", 
-#     \"${comment}\"
-#     );"
-#     
-#   # fetch the FolderID of the newly added row
-# 
-#   # add action to table:Actions when this is succesfull and based on the FolderID
-#   # build actionrow as an array
-#   actionrow=()
-#   addRow2Actions Actions ${lastfolderid} ${actionrow[@]}
-# 
-#   return 0
-#}
-
-
-#--------------------------------------------------------------------------------------
-# create record in Actions
-# required by addRow2Folders
-# a second version will take care of batch import from a file
-
-# in dev not working yet
-
-function addRow2Actions {
-table="Actions"
-folderid=$1; # the fetched last FolderID
-row=$2; # an array of value pairs field=value
-
-# fetch the current table fields into a new array
-existing_fields=($(delimited_fields "Folders" " "))
-
-# validate each user field name against the array above and stop if no match
-
-return 0
 }

@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # shared functions for NCDataMngr
 # StŽphane Plaisance - VIB-Nucleomics Core - 2019-12-23 v1.0
 #
@@ -9,6 +11,7 @@
 # GENERAL FUNCTIONS
 #--------------------------------------------------------------------------------------
 
+
 #--------------------------------------------------------------------------------------
 # parse yaml config file and create variables with prefix
 # usage in terminal: parse_yaml sample.yml "CONF_"
@@ -16,7 +19,8 @@
 # from: https://www.thetopsites.net/article/50350760.shtml
 
 
-function parse_yaml {
+function parse_yaml() # parse yaml config file and create variables with prefix
+{
   local prefix=$2
   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
   sed -ne "s|^\($s\):|\1|" \
@@ -39,7 +43,8 @@ function parse_yaml {
 # required: parse_yaml
 
 
-function process_config {
+function process_config() # parse run_config.yaml and declare corresponding variables
+{
   config=$1
   if [[ -f "${config}" ]]; then
     set -a
@@ -61,7 +66,8 @@ function process_config {
 # required: parse_yaml
 
 
-function listactions {
+function listactions() # list available Actions from allowed_actions.yaml
+{
   parse_yaml allowed_actions.yaml > .tmp
   while read l; do
     echo "${l}"
@@ -81,7 +87,8 @@ function listactions {
 #      position="na"; }
 # ==> do not forget space after '{' and '; ' before '}'
 
-function stringContains {
+function stringContains() # checks if a string congtains a substring
+{
   reqsubstr="$1"
   shift
   string="$@"
@@ -95,28 +102,29 @@ function stringContains {
 }
 
 
-
-
 #--------------------------------------------------------------------------------------
 # test if an input file or folder exists or die
 # usage:
 
 
 # file_exists <some path> || { echo "# <some path> not found"; exit 1 ; }
-function file_exists {
+function file_exists() # check if file exists
+{
   [[ -f "$1" ]] || return 1;
 }
 
 
 # folder_exists <some path> || { echo "# <some path> not found"; exit 1 ; }
-function folder_exists {
+function folder_exists() # check if folder exists
+{
   [[ -d "$1" ]] || return 1;
 }
 
 
 #--------------------------------------------------------------------------------------
 # check if last command succeeded or die with message
-function cmdOK () {
+function cmdOK() # check if last command succeeded
+{
   if [ $? -ne 0 ]
   then
     echo "!! something went wrong, quitting."
