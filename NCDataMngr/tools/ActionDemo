@@ -72,13 +72,14 @@ echo "  is an array of ${#allowed[@]} elements"
 echo "  and contains: '"${allowed[@]}"'"
 
 
-# 3) variables passed through -p (opt_actparams) in the main script
+# 3) variables passed through -p (opt_actparams) in the main script. If several times same var name, returns an array (eg. '-p fold=path1 -p fold=path2')
 
 echo
 echo "# user defined variables using -p var=value"
 echo "opt_actparams is: ${opt_actparams[@]}"
 for v in ${my_vars[@]}; do
-  echo "${v} has value: ${!v}"
+  # test if v is an array and show value(s)
+  is_arr $v && echo "${v} has values: $(arr_get ${v})" || echo "${v} has value: ${!v}"
 done
 
 ####################################################################################
@@ -102,43 +103,46 @@ echo "########### conversions #############"
 # pass a list of items to be converted to an array
 testlist="FolderID=100 Creator=Me BAD=1"
 echo
+echo "# test split2array"
+echo
 echo "# converting string to array with split2array()"
 echo "the test string is: '${testlist}'"
 arr=( $(split2array "${testlist}" " ") )
 echo "${arr[@]} has ${#arr[@]} elements"
-
-# test pairlist2arrays
 echo
-echo "# using pairlist2arrays()"
+echo "# test pairlist2arrays"
+echo
 echo "# test list: ${testlist}"
 res=$(pairlist2arrays "${testlist}")
-
-# split res into two new arrays
+echo
+echo "# split res into two new arrays"
 IFS='|' read -a ar <<< "${res}"
 echo "keys are: ${ar[O]}";     # => FolderID Creator BAD
 echo "values are: ${ar[1]}";   # => 100 Me 1
-
+echo
+echo "# test join_by"
 echo
 echo "# joining the results with comma with join_by()"
 # do not quote the array!
 echo "$( join_by ',' ${ar[O]} )";   # => FolderID,Creator,BAD
 echo "$( join_by ',' ${ar[1]} )";   # => 100,Me,1
-
 echo
 echo "########### database testing #############"
-
+echo
+echo "# test existing_fields"
 echo
 table="Folders"
 echo "# test if fields are valid for table '"${table}"' with validFields()"
 existing_fields=( $(delimited_fields "${table}" " ") )
 echo "# existing fields are: ${existing_fields[@]}"
-
+echo
+echo "# test validFields"
 echo
 echo "# trying with correct field names"
 test_row="FolderID=1 Creator=Me FolderName='/some/path'"
 echo "test row: ${test_row}"
 validFields Folders "${test_row}" && echo "# fields all exist in '"${table}"'"
-
+echo
 echo
 echo "# trying with a bad field name"
 test_row="FolderID=1 Creator=Me FolderName='/some/path' MyBAD=0"

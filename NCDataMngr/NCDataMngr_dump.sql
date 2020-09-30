@@ -39,6 +39,8 @@ CREATE TABLE "Folders" (
 	 "RunNr" TEXT(255,0),
 	 "FlowCellID" TEXT(255,0),
 	 "ProjectNR" TEXT(255,0),
+	 "CustomField1" TEXT(255,0),
+ 	 "CustomField2" TEXT(255,0),
 	 "Status" TEXT(255,0),
 	 "DeliveryDate" TEXT(255,0),
 	 "Comment" TEXT(255,0)

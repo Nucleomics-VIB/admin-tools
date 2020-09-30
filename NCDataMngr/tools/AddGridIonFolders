@@ -23,6 +23,8 @@ protection=0
 status="done"
 deliverydate=""
 comment=""
+runnum=""
+CustomField1=""
 
 # timestamp for tmp file
 ts=$(date +%s)
@@ -86,7 +88,7 @@ actiondate=$(date +%s); # seconds since 1970-01-01
     rtime=${array[1]}
     position=${array[2]}
     flowcellid=${array[3]}
-    runnum=${array[4]}
+    short_protocol_run_id=${array[4]}
     projnum=${array[5]}
     deliverydate=""
 
@@ -118,23 +120,6 @@ actiondate=$(date +%s); # seconds since 1970-01-01
     esac
 
 
-#     echo "#--------------------------------------"
-#     echo "# Creator:        ${creator}"
-#     echo "# CreatorVersion: ${creatorversion}"
-#     echo "# DBAddDate:      ${actiondate}"
-#     echo "# FolderPath:     ${folderpath}"
-#     echo "# FolderName:     ${foldername}"
-#     echo "# FolderSize:     ${foldersize}"
-#     echo "# Protection:     ${protection}"
-#     echo "# DeviceModel:    ${platform}"
-#     echo "# RunDate:        ${rdate}_${rtime}"
-#     echo "# DeviceID:       ${deviceid}"
-#     echo "# RunNr:          ${runnum}"
-#     echo "# FlowCellID:     ${flowcellid}"
-#     echo "# ProjectNR:      ${projnum}"
-#     echo "# Comment:        ${comment}"
-#     echo "#--------------------------------------"
-
   # write to existing database ${sqlitedbpath}
   cat << END_BLOCK >> tmp/cmd_${ts}.sql
 /*
@@ -158,6 +143,8 @@ INSERT OR IGNORE INTO Folders
   RunNr, 
   FlowCellID, 
   ProjectNR, 
+  CustomField1
+  CustomField2
   Status, 
   DeliveryDate, 
   Comment
@@ -176,6 +163,8 @@ VALUES (
   ${d}${runnum}${d}, 
   ${d}${flowcellid}${d}, 
   ${d}${projnum}${d}, 
+  ${d}${runshort_protocol_run_id}${d},
+  ${d}${CustomField2}${d},
   ${d}${status}${d}, 
   ${d}${deliverydate}${d}, 
   ${d}${comment}${d}

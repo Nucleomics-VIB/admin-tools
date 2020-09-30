@@ -42,7 +42,7 @@ shift $(( OPTIND - 1 ))
 # * no spaces or = in var names
 # * use single quotes around multiword values
 # * no special characters 
-# in your action scripts, the variables will be ready to usernoted
+# in your action scripts, the variables will be ready for use
 #  see ==> ActionDemo
 
 # the quote symbols can be nice to have in complex calls
@@ -103,11 +103,21 @@ then
 
   # extract and declare variables
   for var in "${opt_actparams[@]}"; do
-    declare "${var}"
     # extract variable name and value
     read name value <<< $(echo ${var} | awk -F= '{print $1, $2}')
-    my_vars=(${my_vars[@]} "${name}")
+    my_vars=( ${my_vars[@]} "${name}" )
+    # handle several times the same variable name
+    if [ -z ${!name} ]; then
+      # new variable, gets unique value
+      declare "${var}"
+    else
+      # variable already exists, add new value in it as array
+      arr_insert ${name} ${value}
+    fi
   done
+
+  # retain unique variable names when duplicates are present
+  my_vars=( $(printf "%s\n" "${my_vars[@]}" | sort -u) )
 
 fi
 

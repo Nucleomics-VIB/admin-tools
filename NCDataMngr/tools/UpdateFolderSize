@@ -7,31 +7,32 @@ actionversion="1.0; 2020-09-11"
 # aim: add or change FolderSize for a given FolderName based on current DUC info
 
 usage='# Usage: '${scriptname}' -a '${action}' -p foldername=<FolderName> -p comment=<Comment> (optional)
+# example: -p foldername=Novaseq -p comment="after cleanup"
 # script version '${actionversion}
 
 ########################################################################
 # Edit local variables here if necessary
 
-# get extra arguments from ${opt_actparams} (here an array of up to 2)
-r_foldername=${opt_actparams[0]}
-r_comment_add=${opt_actparams[1]:-""}
+# passed though ${opt_actparams[@]}
+r_foldername=${foldername}
+r_comment_add=${comments:-""}
 status="done"
 
 ####################### no edits below this line #######################
 
-# FolderName is provided
-if [ -z "${opt_actparams[0]}" ]
+# FolderName was provided via ${opt_actparams[@]}
+if [ -z "${r_foldername}" ]
 then
-	echo "# no Folder Name provided"
-	echo "${usage}"
-	exit 1
+  echo "# no Folder Name provided"
+  echo "${usage}"
+  exit 1
 fi
 
 # sqlite3 and share variables
-databasepath=$CONF_database_path;  # "/Users/u0002316/databases"
-databasename=$CONF_database_name;  # "NCDataMngr.sqlite"
-mountpoint=$CONF_mount_point;      # "/Volumes/lvs/GBW-0047_NUC_Transfers"
-mountpath=$CONF_mount_path;        # "0003_Runs"
+databasepath=${CONF_database_path}
+databasename=${CONF_database_name}
+mountpoint=${CONF_mount_point}
+mountpath=${CONF_mount_path}
 
 # date-tag
 actiondate=$(date +%s)
@@ -68,22 +69,22 @@ a_comment="size: ${r_foldersize} => ${ducfoldersize} ; comment: ${cur_comment} =
 
 # insert action row in Actions table using ${currentFolderID}
 sqlite3 "${databasepath}/${databasename}" "INSERT INTO Actions 
-	(
-	FolderID, 
-	Creator, 
-	CreatorVersion, 
-	ActionDate, 
-	ActionName, 
-	Status, 
-	Comment
-	) 
+  (
+  FolderID, 
+  Creator, 
+  CreatorVersion, 
+  ActionDate, 
+  ActionName, 
+  Status, 
+  Comment
+  ) 
 VALUES (
-	\"${r_folderid}\", 
-	\"${creator}\", 
-	\"${creatorversion}\", 
-	\"${actiondate}\", 
-	\"${scriptname}\", 
-	\"${status}\", 
-	\"${a_comment}\"
-	);"
+  \"${r_folderid}\", 
+  \"${creator}\", 
+  \"${creatorversion}\", 
+  \"${actiondate}\", 
+  \"${scriptname}\", 
+  \"${status}\", 
+  \"${a_comment}\"
+  );"
 

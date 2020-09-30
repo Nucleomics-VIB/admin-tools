@@ -23,7 +23,7 @@ Action scripts are commands that perform simple actions, they are launched by th
 "Shows the list of all variables defined in 'run_config.yaml'"
 
 * ShareStatus
-"Shows the current usage of the share"
+"Shows the current usage of the share (add '-p <subfolder-name>' to get more details)"
 
 ### T:/0003_Runs Storage scanning actions
 
