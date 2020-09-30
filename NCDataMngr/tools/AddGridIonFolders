@@ -25,6 +25,7 @@ deliverydate=""
 comment=""
 runnum=""
 CustomField1=""
+CustomField2=""
 
 # timestamp for tmp file
 ts=$(date +%s)
@@ -163,7 +164,7 @@ VALUES (
   ${d}${runnum}${d}, 
   ${d}${flowcellid}${d}, 
   ${d}${projnum}${d}, 
-  ${d}${runshort_protocol_run_id}${d},
+  ${d}${short_protocol_run_id}${d},
   ${d}${CustomField2}${d},
   ${d}${status}${d}, 
   ${d}${deliverydate}${d}, 
