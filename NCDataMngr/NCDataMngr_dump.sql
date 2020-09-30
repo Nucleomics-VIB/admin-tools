@@ -3,8 +3,10 @@
  Author: Stéphane Plaisance - VIB-Nucleomics Core
  database version: 1.0 - 2020-09-11
  File Encoding         : utf-8
- REM: edit below if you change the database schema
- => INSERT INTO "version" (vnum, vdate) VALUES ("1.0", "2020-09-11");
+ REM: edit CreateEmptyDB when you change the database schema
+ dbversion="1.1"
+ dbcreatedate=$(date)
+ last edit 2020-09-30; version 1.1
 */
 
 PRAGMA foreign_keys = false;
