@@ -144,8 +144,8 @@ INSERT OR IGNORE INTO Folders
   RunNr, 
   FlowCellID, 
   ProjectNR, 
-  CustomField1
-  CustomField2
+  CustomField1,
+  CustomField2,
   Status, 
   DeliveryDate, 
   Comment
