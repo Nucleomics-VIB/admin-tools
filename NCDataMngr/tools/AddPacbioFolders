@@ -203,7 +203,6 @@ echo "PRAGMA foreign_keys = false;" >> tmp/cmd_${ts}.sql
 # execute file and cleanup
 cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${d}.read ${CONF_database_path}/tmp/cmd_${ts}.sql${d};"
 # echo "# ${cmd}"
-eval ${cmd} \
-# && rm tmp/cmd_${ts}.sql
+eval ${cmd} && rm tmp/cmd_${ts}.sql
 
 exit 0

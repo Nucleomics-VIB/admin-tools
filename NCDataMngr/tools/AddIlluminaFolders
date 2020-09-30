@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# script: AddIlluminaFolders3
-action="AddIlluminaFolders3"
+# script: AddIlluminaFolders
+action="AddIlluminaFolders"
 actionversion="1.0; 2020-09-11"
 #
 # aim: add/update records in the database for all Illumina Folders found in
@@ -10,6 +10,7 @@ actionversion="1.0; 2020-09-11"
 #
 # NOTE: will only scan one level and valid folders based on their name
 # NEW in this version first checks if a folder is new before adding it
+#     => saving big time on re-runs
 
 ########################################################################
 # Edit here if necessary
@@ -231,7 +232,6 @@ echo "PRAGMA foreign_keys = false;" >> tmp/cmd_${ts}.sql
 # execute file and cleanup
 cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${d}.read ${CONF_database_path}/tmp/cmd_${ts}.sql${d};"
 # echo "# ${cmd}"
-eval ${cmd} \
-# && rm tmp/cmd_${ts}.sql
+eval ${cmd} && rm tmp/cmd_${ts}.sql
 
 exit 0
