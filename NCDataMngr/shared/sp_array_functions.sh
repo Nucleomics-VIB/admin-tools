@@ -83,11 +83,12 @@ function pairlist2arrays() # split a list of pairs into two arrays
 
 function inArray() # test if element '$1' is in array '$@'
 {
-  q=$1
+  # ex: inArray ${folder_status} ${CONF_folder_status[@]} (no quotes around variables!)
+  local query=$1
   shift
   # debug: echo "# looking for $q in $@"
   while [ $# -gt 0 ]; do
-    [[ "$q" == "$1" ]] && return 0; # found
+    [[ "$query" == "$1" ]] && return 0; # found
     shift
   done
   # not found

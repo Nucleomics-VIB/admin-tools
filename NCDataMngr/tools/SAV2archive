@@ -1,0 +1,160 @@
+#!/bin/bash
+
+# script: SAV2archive
+action="SAV2archive"
+actionversion="1.0; 2020-10-02"
+#
+# aim: create Illumina SAV data archive and save it to ${CONF_mount_savpath}/${platform}
+
+usage='# Usage: '${scriptname}' -a '${action}' -p folderpath=<FolderPath> -p foldername=<FolderName>
+# script version '${actionversion}
+
+########################################################################
+# Edit local variables here if necessary
+
+# set more workers for pigz, could increase when our server has more => speedup
+thr=2
+folderstatus="sav_archived"
+
+####################### no edits below this line #######################
+
+# sqlite3 and share variables
+databasepath=${CONF_database_path}
+databasename=${CONF_database_name}
+mountpoint=${CONF_mount_point}
+mountpath=${CONF_mount_path}
+mountsavpath=${CONF_mount_savpath}
+
+
+# timestamp for tmp file
+ts=$(date +%s)
+lts=$(date -r ${ts})
+
+# creator
+creator=${action}
+creatorversion=${actionversion}
+
+# check if requirements are present
+$( hash tar 2>/dev/null ) || { >&2 echo "# tar not found in PATH"; exit 1; }
+$( hash pigz 2>/dev/null ) || { >&2 echo "# pigz not found in PATH"; exit 1; }
+
+# Folderpath provided via ${opt_actparams[@]} ?
+if [ -z "${folderpath}" ]
+then
+  echo "# no Folder Path provided"
+  echo "${usage}"
+  exit 1
+fi
+
+# FolderName provided via ${opt_actparams[@]} ?
+if [ -z "${foldername}" ]
+then
+  echo "# no Folder Name provided"
+  echo "${usage}"
+  exit 1
+fi
+
+# check folder exists
+folder_exists ${mountpoint}/${folderpath}/${foldername} || { >&2 echo "# ${foldername} not found in ${folderpath}"; exit 1; }
+
+# extract platform from ${folderpath}
+platform=$(basename ${folderpath})
+
+# check SAV archive already present
+file_exists ${mountpoint}/${mountsavpath}/${platform}/${foldername}_SAV-archive.tgz \
+  && { >&2 echo "# SAV archive already present, delete it an re-run to rebuilt it"; exit 0; }
+
+# check if all required SAV files are present (thumbnails are excluded here, old story!)
+test -f ${mountpoint}/${folderpath}/${foldername}/RunInfo.xml || { >&2 echo "RunInfo.xml not found!"; exit 1; }
+test -f ${mountpoint}/${folderpath}/${foldername}/[Rr]unParameters.xml || { >&2 echo "RunParameters.xml not found!"; exit 1; } 
+test -d ${mountpoint}/${folderpath}/${foldername}/InterOp || { >&2 echo "InterOp not found!"; exit 1; }
+
+# Create archive from SAV data if present
+>&2 echo "# creating SAV archive from ${mountpoint}/${folderpath}/${foldername}"
+
+# remember current path to return after tar command
+curdir=$(pwd)
+
+cmd="cd ${mountpoint}/${folderpath}/${foldername} && \
+  tar -cf - RunInfo.xml \
+    [Rr]unParameters.xml \
+    InterOp \
+    | pigz -p ${thr} \
+      > ${mountpoint}/${mountsavpath}/${platform}/${foldername}_SAV-archive.tgz && \
+        touch ${mountpoint}/${mountsavpath}/${platform}/${foldername}_SAV-archive_created"
+
+# echo "# ${cmd}"
+eval ${cmd}
+
+# check if command succeeded <=> empty file flag present
+file_exists ${mountpoint}/${mountsavpath}/${platform}/${foldername}_SAV-archive_created \
+  && { cd ${curdir}; >&2 ls -lah ${mountpoint}/${mountsavpath}/${platform}/${foldername}_SAV-archive.tgz; } \
+  || { cd ${curdir}; >&2 echo "# archiving SAV data failed, please check"; exit 1; }
+
+# check folderpath+foldername exists and get current status
+cmd="sqlite3 ${d}${databasepath}/${databasename}${d} ${q}SELECT FolderID, FolderPath, FolderName FROM Folders WHERE FolderPath=${d}${folderpath}${d} AND FolderName=${d}${foldername}${d};${q}"
+# echo "# ${cmd}"
+row=$(eval ${cmd} )
+# split row into array
+curdata=( $(split2array ${row}) )
+
+# prepare a SQL script to add action record in a single sqlite3 session
+# write script file header
+
+cat << END_BLOCK >> tmp/cmd_${ts}.sql
+/*
+------------------------------------------------------------------
+written by '${action}'
+date: '${lts}'
+ts: '${ts}'
+------------------------------------------------------------------
+*/
+
+PRAGMA foreign_keys = false;
+
+/*
+------------------------------------------------------------------
+updating status for '${folderpath}/${foldername}
+------------------------------------------------------------------
+*/
+
+UPDATE Folders
+SET FolderStatus=${q}${folderstatus}${q}
+WHERE FolderID=${q}${curdata[0]}${q};
+
+/*
+------------------------------------------------------------------
+adding data in Actions for ${folderpath}/${foldername}
+------------------------------------------------------------------
+*/
+
+INSERT INTO Actions 
+  (
+  FolderID,
+  Creator, 
+  CreatorVersion, 
+  ActionDate, 
+  ActionName, 
+  Comment
+  )
+VALUES (
+  ${curdata[0]},
+  ${d}${creator}${d}, 
+  ${d}${creatorversion}${d}, 
+  ${d}${ts}${d}, 
+  ${d}${action}${d}, 
+  ${d}archive without Thumbnail_Images${d}
+  );
+
+-- ----------------------------------------------------------------
+
+PRAGMA foreign_keys = false;
+
+END_BLOCK
+
+# else execute file and cleanup
+cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${d}.read ${CONF_database_path}/tmp/cmd_${ts}.sql${d};"
+# echo "# ${cmd}"
+eval ${cmd} && rm tmp/cmd_${ts}.sql
+
+exit 0

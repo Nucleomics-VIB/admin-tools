@@ -20,7 +20,7 @@ creatorversion=${actionversion}
 
 # default values
 protection=0
-status="done"
+status="added"
 deliverydate=""
 comment=""
 

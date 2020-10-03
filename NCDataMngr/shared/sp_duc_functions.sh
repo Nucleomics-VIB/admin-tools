@@ -62,9 +62,10 @@ function get_folder_size_local() # get folder size from DUC from Nuc1 (local)
   mountpoint="/mnt/nuc-transfer"
   folderpath=${1}
   size=$(duc ls -D -b \
-    -d "${CONF_duc_nuc1db}" "${CONF_duc_nuc1mnt}/${CONF_mount_path}/${folderpath}" \
-    | cut -d " " -f 1)
-  echo ${size:-0} 
+    -d "${CONF_duc_nuc1db}" "${CONF_duc_nuc1mnt}/${CONF_mount_path}/${folderpath}"  2>&1)
+  # handle not found in DUC
+  [[ ${size} == *'Requested path not found'* ]] && { echo "NULL"; } \
+    || { echo ${size} | cut -d " " -f 1; }
 }
 
 
@@ -79,9 +80,10 @@ function get_folder_size_nuc1() # get folder size from DUC from Nuc1 (via ssh)
   mountpoint="/mnt/nuc-transfer"
   folderpath=${1}
   # >&2 echo "${mountpoint}/${folderpath}"
-  size=$(ssh ${sshhost} '/opt/tools/duc/duc4 ls -D -b -d '${ducdb} ${mountpoint}/${folderpath}' | \
-    cut -d " " -f 1')
-  echo ${size:-0} 
+  size=$(ssh ${sshhost} '/opt/tools/duc/duc4 ls -D -b -d '${ducdb} ${mountpoint}/${folderpath} 2>&1)
+  # handle not found in DUC
+  [[ ${size} == *'Requested path not found'* ]] && { echo "NULL"; } \
+    || { echo ${size} | cut -d " " -f 1; }
 }
 
 
@@ -96,9 +98,10 @@ function get_folder_size_nuc4() # get folder size from DUC from Nuc4 via ssh (ob
   mountpoint="/mnt/nuc-transfer"
   folderpath=${1}
   # echo "${mountpoint}/${folderpath}"
-  size=$(ssh ${sshhost} 'duc ls -D -b -d '${ducdb} ${mountpoint}/${folderpath}' | \
-    cut -d " " -f 1')
-  echo ${size:-0} 
+  size=$(ssh ${sshhost} 'duc ls -D -b -d '${ducdb} ${mountpoint}/${folderpath}  2>&1)
+  # handle not found in DUC
+  [[ ${size} == *'Requested path not found'* ]] && { echo "NULL"; } \
+    || { echo ${size} | cut -d " " -f 1; }
 }
 
 

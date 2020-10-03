@@ -4,13 +4,20 @@
 action="AddIlluminaFolders"
 actionversion="1.0; 2020-09-11"
 #
-# aim: add/update records in the database for all Illumina Folders found in
-# ${CONF_mount_point}/${CONF_mount_path}
-# default folders from  ${CONF_illumina_folderarray}
+# aim: add new records in the database for all new Illumina Folders found in
+# ${CONF_mount_point}/${CONF_mount_path} 
+# or for one or more named Illumina Folders given by -p targets=<Foldername>
+# default target folders are taken from  ${CONF_illumina_folderarray}
 #
 # NOTE: will only scan one level and valid folders based on their name
 # NEW in this version first checks if a folder is new before adding it
 #     => saving big time on re-runs
+# NOTE: folders existing in the DB are ignored and passed even if the data changed
+# NOTE: To modify existing folders use UpdateIlluminaFolders
+
+usage='# Usage: '${scriptname}' -a '${action}' -p targets=<FolderName> (optional) -p comment="some comment" (optional)
+# example: -p targets=<Folder> or -p targets=(<F1> <F2> <F3>) -p comment="after cleanup"
+# script version '${actionversion}
 
 ########################################################################
 # Edit here if necessary
@@ -21,7 +28,7 @@ creatorversion=${actionversion}
 
 # default values
 protection=0
-status="done"
+status="added"
 deliverydate=""
 comment=""
 
@@ -39,18 +46,17 @@ lts=$(date -r ${ts})
 case ${my_vars[@]} in
   "")
     targets=(${CONF_illumina_folderarray});;
-    
   targets)
     good=1;;
   *) 
     echo "# invalid argument ${v}"
-    echo "should be '-p targets=<Folder>' or '-p targets=(<F1> <F2> <F3>)'"
+    echo "${usage}"
     exit 1
 esac
 
-
 mkdir -p tmp
 
+# prepare a SQL script to import new data in the DB in a single sqlite3 session
 # write script file header
 echo '/*
 ------------------------------------------------------------------
@@ -85,7 +91,7 @@ for platform in ${targets[*]}; do
     { echo "-- ${platform} is not a valid target"; exit 1; }
   
 
-# find proper Illumina run folders starting with 19 or 20 (year)
+  # find proper Illumina run folders starting with 19 or 20 (year)
   runfolders=$(find ${mountpoint}/${mountpath}/${platform} -type d -maxdepth 1 \
     | grep "^${mountpoint}/${mountpath}/${platform}/[12]")
 
@@ -129,24 +135,6 @@ for platform in ${targets[*]}; do
         >&2 echo "invalid CONF_duc_access options: ${CONF_duc_access} in run_config.yaml"
         exit 1
     esac
-
-
-#     echo "#--------------------------------------"
-#     echo "# Creator:        ${creator}"
-#     echo "# CreatorVersion: ${creatorversion}"
-#     echo "# DBAddDate:      ${actiondate}"
-#     echo "# FolderPath:     ${folderpath}"
-#     echo "# FolderName:     ${foldername}"
-#     echo "# FolderSize:     ${foldersize}"
-#     echo "# Protection:     ${protection}"
-#     echo "# DeviceModel:    ${platform}"
-#     echo "# RunDate:        ${rdate}"
-#     echo "# DeviceID:       ${deviceid}"
-#     echo "# RunNr:          ${runnum}"
-#     echo "# FlowCellID:     ${flowcellid}"
-#     echo "# ProjectNR:      ${projnum}"
-#     echo "# Comment:        ${comment}"
-#     echo "#--------------------------------------"
 
   # write to existing database ${sqlitedbpath}
   cat << END_BLOCK >> tmp/cmd_${ts}.sql

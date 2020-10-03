@@ -1,0 +1,151 @@
+#!/bin/bash
+
+# script: UpdateAllFolderSizes
+action="UpdateAllFolderSizes"
+actionversion="1.0; 2020-10-02"
+#
+# aim: leave or change FolderSize for all folders stored in the DB based on current DUC
+
+usage='# Usage: '${scriptname}' -a '${action}' -p comment=<Comment> (optional)
+# example: -p comment="after cleanup"
+# script version '${actionversion}
+
+########################################################################
+# Edit local variables here if necessary
+
+# passed though ${opt_actparams[@]}
+a_comment=${comment:-""}
+
+####################### no edits below this line #######################
+
+# sqlite3 and share variables
+databasepath=${CONF_database_path}
+databasename=${CONF_database_name}
+mountpoint=${CONF_mount_point}
+mountpath=${CONF_mount_path}
+
+# creator
+creator=${action}
+creatorversion=${actionversion}
+
+# timestamp for tmp file
+ts=$(date +%s)
+lts=$(date -r ${ts})
+
+# create a sql script file tmp/cmd_${timestamp}.sql with all commands
+# then source it with :
+#   sqlite3 "${databasepath}/${databasename}" ".read tmp/cmd_${timestamp}.sql"
+mkdir -p tmp
+
+# prepare a SQL script to import new data in the DB in a single sqlite3 session
+# write script file header
+echo '/*
+------------------------------------------------------------------
+written by '${action}'
+date: '${lts}'
+ts: '${ts}'
+------------------------------------------------------------------
+*/
+
+PRAGMA foreign_keys = false;
+
+' > tmp/cmd_${ts}.sql
+
+# get ALL FolderID, FolderPath, FolderName, FolderSize from database into array
+declare -a curcont=( $(sqlite3 "${databasepath}/${databasename}" 'SELECT FolderID, FolderPath, FolderName, FolderSize FROM Folders;') )
+
+# found records with changed size
+changed=0
+
+# parse list and check for changes
+for row in ${curcont[@]}
+do
+# split row into array
+curdata=( $(split2array $row) )
+
+# progress
+>&2 echo -n "# getting DUC size for: ${curdata[1]}/${curdata[2]}"
+
+# get folder size from DUC (several possible ways based on ${CONF_duc_access} !)
+case ${CONF_duc_access} in
+  nuc1local)
+    foldersize=$(get_folder_size_local "${curdata[1]}/${curdata[2]}")
+    ;;
+  nuc1ssh)
+    foldersize=$(get_folder_size_nuc1 "${curdata[1]}/${curdata[2]}")
+    ;;
+  nuc4ssh)
+    foldersize=$(get_folder_size_nuc4 "${curdata[1]}/${curdata[2]}")
+    ;;
+  *)
+    >&2 echo "invalid CONF_duc_access options: ${CONF_duc_access} in run_config.yaml"
+    exit 1
+esac
+
+# test if folder is currently on the share
+folder_exists ${mountpoint}/${curdata[1]}/${curdata[2]} \
+  || { >&2 echo " | not found on share"; continue; }
+
+# test if size is unchanged
+[ "${foldersize}" == "${curdata[3]}" ] && { >&2 echo " | same size"; continue; }
+
+# size has indeed changed
+((changed++))
+>&2 echo " | old size: ${curdata[3]} -> new size: ${foldersize}"
+
+# write to existing database ${sqlitedbpath}
+cat << END_BLOCK >> tmp/cmd_${ts}.sql
+/*
+------------------------------------------------------------------
+updating size for '${folderpath}/${foldername}
+------------------------------------------------------------------
+*/
+
+UPDATE Folders
+SET FolderSize=${q}${foldersize}${q}, 
+WHERE FolderPath=${q}${curdata[1]}${q}
+AND FolderName=${q}${curdata[2]}${q};
+
+/*
+------------------------------------------------------------------
+adding data in Actions for ${folderpath}/${foldername}
+------------------------------------------------------------------
+*/
+
+INSERT INTO Actions 
+  (
+  FolderID,
+  Creator, 
+  CreatorVersion, 
+  ActionDate, 
+  ActionName, 
+  Comment
+  )
+VALUES (
+  ${curdata[0]},
+  ${d}${creator}${d}, 
+  ${d}${creatorversion}${d}, 
+  ${d}${ts}${d}, 
+  ${d}${action}${d}, 
+  ${d}comment="changed from ${q}${curdata[3]}${q} to ${q}${foldersize}${q} (${a_comment})"
+${d}
+  );
+
+-- ----------------------------------------------------------------
+
+END_BLOCK
+
+done
+
+# write FOOTER in file
+echo "PRAGMA foreign_keys = false;" >> tmp/cmd_${ts}.sql
+
+# exit if no changes
+((changed)) || { >&2 echo "# no size changes found, quitting"; rm tmp/cmd_${ts}.sql; exit 0; }
+
+# else execute file and cleanup
+cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${d}.read ${CONF_database_path}/tmp/cmd_${ts}.sql${d};"
+# echo "# ${cmd}"
+eval ${cmd} && rm tmp/cmd_${ts}.sql
+
+exit 0

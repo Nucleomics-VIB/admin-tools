@@ -2,6 +2,9 @@
 # list of allowed status names
 # add new statuses with parsimony
 
+folder:
+  status: "added sav_archived run_archived run_transferred pre_trashed"
+
 action:
   status: "submitted running done failed"
 

@@ -1,0 +1,158 @@
+#!/bin/bash
+
+# script: Folder2archive
+action="Folder2archive"
+actionversion="1.0; 2020-10-02"
+#
+# aim: create Illumina Run folder archive and save it to ${CONF_mount_archivepath}
+
+usage='# Usage: '${scriptname}' -a '${action}' -p folderpath=<FolderPath> -p foldername=<FolderName> -p expnumber=<expNR>
+# script version '${actionversion}
+
+########################################################################
+# Edit local variables here if necessary
+
+# set more workers for pigz, could increase when our server has more => speedup
+thr=2
+
+# status after success
+folderstatus="run_archived"
+
+####################### no edits below this line #######################
+
+# sqlite3 and share variables
+databasepath=${CONF_database_path}
+databasename=${CONF_database_name}
+mountpoint=${CONF_mount_point}
+mountpath=${CONF_mount_path}
+mountarchivepath=${CONF_mount_archivepath}
+
+# timestamp for tmp file
+ts=$(date +%s)
+lts=$(date -r ${ts})
+
+# creator
+creator=${action}
+creatorversion=${actionversion}
+
+# check if requirements are present
+$( hash tar 2>/dev/null ) || { >&2 echo "# tar not found in PATH"; exit 1; }
+$( hash pigz 2>/dev/null ) || { >&2 echo "# pigz not found in PATH"; exit 1; }
+
+# Folderpath provided via ${opt_actparams[@]} ?
+if [ -z "${folderpath}" ]
+then
+  echo "# no Folder Path provided"
+  echo "${usage}"
+  exit 1
+fi
+
+# FolderName provided via ${opt_actparams[@]} ?
+if [ -z "${foldername}" ]
+then
+  echo "# no Folder Name provided"
+  echo "${usage}"
+  exit 1
+fi
+
+# check folder exists (beware!!, SMB is case insensitive)
+folder_exists ${mountpoint}/${folderpath}/${foldername} \
+  || { >&2 echo "# ${foldername} not found in ${folderpath}"; exit 1; }
+
+# check Run folder archive already present
+file_exists ${mountpoint}/${mountarchivepath}/${foldername}_archive.tgz \
+  && { >&2 echo "# Folder archive already present, delete it an re-run to rebuilt it"; exit 0; }
+
+# Create archive from Run folder if present
+>&2 echo "# creating Folder archive from ${mountpoint}/${folderpath}/${foldername}"
+
+# remember current path to return after tar command
+curdir=$(pwd)
+
+cmd="cd ${mountpoint}/${folderpath} && \
+  tar -cf - ${foldername}/* \
+    | pigz -p ${thr} \
+      > ${mountpoint}/${mountarchivepath}/${foldername}_archive.tgz \
+        && touch ${mountpoint}/${mountarchivepath}/${foldername}_archive_created"
+
+# echo "# ${cmd}"
+eval ${cmd}
+
+# check if command succeeded <=> empty file flag present
+file_exists ${mountpoint}/${mountarchivepath}/${foldername}_archive_created \
+  && { >&2 echo "# creating MD5sum of the targz archive"; 
+      cd ${mountpoint}/${mountarchivepath}; 
+      md5sum ${foldername}_archive.tgz > ${foldername}_archive_md5sum.txt; 
+      cd ${curdir}; 
+      >&2 ls -lah ${mountpoint}/${mountarchivepath}/${foldername}_archive*; } \
+  || { cd ${curdir}; >&2 echo "# archiving Folder failed, please check"; exit 1; }
+
+# check folderpath+foldername exists and get current status
+cmd="sqlite3 ${d}${databasepath}/${databasename}${d} ${q}SELECT FolderID, FolderPath, FolderName, FolderStatus FROM Folders WHERE FolderPath=${d}${folderpath}${d} AND FolderName=${d}${foldername}${d};${q}"
+echo "# ${cmd}"
+row=$(eval ${cmd} )
+# split row into array
+curdata=( $(split2array ${row}) )
+
+folderid=${curdata[0]}
+
+# prepare a SQL script to add action record in a single sqlite3 session
+# write script file header
+
+cat << END_BLOCK >> tmp/cmd_${ts}.sql
+/*
+------------------------------------------------------------------
+written by '${action}'
+date: '${lts}'
+ts: '${ts}'
+------------------------------------------------------------------
+*/
+
+PRAGMA foreign_keys = false;
+
+/*
+------------------------------------------------------------------
+updating status for '${folderpath}/${foldername}'
+------------------------------------------------------------------
+*/
+
+UPDATE Folders
+SET FolderStatus=${q}${folderstatus}${q}
+WHERE FolderID=${q}${folderid}${q};
+
+/*
+------------------------------------------------------------------
+adding data in Actions for ${folderpath}/${foldername}
+------------------------------------------------------------------
+*/
+
+INSERT INTO Actions 
+  (
+  FolderID,
+  Creator, 
+  CreatorVersion, 
+  ActionDate, 
+  ActionName, 
+  Comment
+  )
+VALUES (
+  ${folderid},
+  ${d}${creator}${d}, 
+  ${d}${creatorversion}${d}, 
+  ${d}${ts}${d}, 
+  ${d}${action}${d}, 
+  ${d}full raw run archive${d}
+  );
+
+-- ----------------------------------------------------------------
+
+PRAGMA foreign_keys = false;
+
+END_BLOCK
+
+# execute file and cleanup
+cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${d}.read ${CONF_database_path}/tmp/cmd_${ts}.sql${d};"
+# echo "# ${cmd}"
+eval ${cmd} && rm tmp/cmd_${ts}.sql
+
+exit 0

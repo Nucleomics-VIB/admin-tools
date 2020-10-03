@@ -103,7 +103,7 @@ function stringContains() # checks if a string congtains a substring
 
 
 #--------------------------------------------------------------------------------------
-# test if an input file or folder exists or die
+# test if an input file or folder exists (0) or return 1
 # usage:
 
 
@@ -115,9 +115,20 @@ function file_exists() # check if file exists
 
 
 # folder_exists <some path> || { echo "# <some path> not found"; exit 1 ; }
+# NOTE: this command is case-insensitive on SMB shares! beware for typos
 function folder_exists() # check if folder exists
 {
   [[ -d "$1" ]] || return 1;
+}
+
+
+# folder $1 exists within max-depth $2 (default to 2)
+# folder_exists_rec <some path> 2 || { echo "# <some path> not found"; exit 1 ; }
+# NOTE: this command is case-insensitive on SMB shares! beware for typos
+function folder_exists_rec() # check if folder exists (recursive, max-depth default to 2)
+{
+  d=${2:-2}
+  find $1 -mindepth 1 -maxdepth $d -type d -name $1 > /dev/null || return 1;
 }
 
 
@@ -130,4 +141,46 @@ function cmdOK() # check if last command succeeded
     echo "!! something went wrong, quitting."
     exit 1
   fi
+}
+
+
+#--------------------------------------------------------------------------------------
+# convert date to epoch
+# eg. date2epoch 2020-10-02 => 1601589600
+# 'now' will give today's epoch
+# 'null' will return ''
+function date2epoch() # convert date of type YYYY-MM-DD to epoch string
+{
+case ${1} in
+  now)
+      a_date=$(date +%s) ;;
+  null)
+      a_date='' ;;
+  *) 
+      case ${OSTYPE} in
+      darwin*)
+        a_date=$(date -j -u -f "%Y-%m-%d_%H:%M:%S" "${1}_0:0:0" +"%s") || { echo "# invalid date format, should be YYYY-MM-DD, ${q}now${q}, or ${q}null${q}"; exit 1; } ;;
+      *)
+        a_date=$(date -d ${1} +%s) || { echo "# invalid date format, should be YYYY-MM-DD, ${q}now${q}, or ${q}null${q}"; exit 1; } ;;
+      esac ;;
+esac
+echo ${a_date}
+}
+
+
+#--------------------------------------------------------------------------------------
+# convert epoch to date YYYY-MM-DD
+# eg. epoch2date 1601589600 => 2020-10-02
+# 'now' will give today's epoch
+# 'null' will return ''
+function epoch2date() # convert date of type YYYY-MM-DD to epoch string
+{
+[[ -z ${1+x} ]] \
+|| { case ${OSTYPE} in
+  darwin*)
+      epoch_date=$(date -j -u -f "%s" ${1} +"%Y-%m-%d")  ;;
+        *)
+      epoch_date=$(date -d @${1} +"%Y-%m-%d") ;;
+esac; }
+echo ${epoch_date}
 }

@@ -1,0 +1,134 @@
+#!/bin/bash
+
+# script: SetFolderStatus
+action="SetFolderStatus"
+actionversion="1.0; 2020-10-02"
+#
+# aim: manually set Folder Status for a given FolderName + FolderName
+
+usage='# Usage: '${scriptname}' -a '${action}' -p folderpath=<FolderPath> -p foldername=<FolderName> -p folderstatus=<new status>
+optionally add -p comment=<comment>
+# script version '${actionversion}
+
+########################################################################
+# Edit local variables here if necessary
+
+# passed though ${opt_actparams[@]}
+a_comment=${comment:-""}
+
+####################### no edits below this line #######################
+
+# sqlite3 and share variables
+databasepath=${CONF_database_path}
+databasename=${CONF_database_name}
+mountpoint=${CONF_mount_point}
+mountpath=${CONF_mount_path}
+
+# timestamp for tmp file
+ts=$(date +%s)
+lts=$(date -r ${ts})
+
+# creator
+creator=${action}
+creatorversion=${actionversion}
+
+# Folderpath provided via ${opt_actparams[@]} ?
+if [ -z "${folderpath}" ]
+then
+  echo "# no Folder Path provided"
+  echo "${usage}"
+  exit 1
+fi
+
+# FolderName provided via ${opt_actparams[@]} ?
+if [ -z "${foldername}" ]
+then
+  echo "# no Folder Name provided"
+  echo "${usage}"
+  exit 1
+fi
+
+# Status provided via ${opt_actparams[@]} ?
+if [ -z "${folderstatus}" ]
+then
+  echo "# no FolderStatus provided"
+  echo "${usage}"
+  exit 1
+fi
+
+# check valid status against ${CONF_folder_status[@]}
+inArray ${folderstatus} ${CONF_folder_status[@]} || \
+  { >&2 echo "# ${q}${folderstatus}${q} is not a valid status of ${q}$(join_by "," ${CONF_folder_status[@]})${q}, see allowed_status.yaml"; exit 1; }
+
+# check folderpath+foldername exists and get current status
+cmd="sqlite3 ${d}${databasepath}/${databasename}${d} ${q}SELECT FolderID, FolderPath, FolderName, FolderStatus FROM Folders WHERE FolderPath=${d}${folderpath}${d} AND FolderName=${d}${foldername}${d};${q}"
+# echo "# ${cmd}"
+row=$(eval ${cmd} )
+# split row into array
+curdata=( $(split2array ${row}) )
+
+# test if FolderStatus is unchanged
+[ "${folderstatus}" == "${curdata[3]}" ] && { >&2 echo "# already in that status, quitting"; exit 0; }
+
+# prepare a SQL script to set the Folder Status in the DB 
+# and add action record in a single sqlite3 session
+# write script file header
+
+cat << END_BLOCK >> tmp/cmd_${ts}.sql
+/*
+------------------------------------------------------------------
+written by '${action}'
+date: '${lts}'
+ts: '${ts}'
+------------------------------------------------------------------
+*/
+
+PRAGMA foreign_keys = false;
+
+/*
+------------------------------------------------------------------
+updating size for '${folderpath}/${foldername}
+------------------------------------------------------------------
+*/
+
+UPDATE Folders
+SET FolderStatus=${q}${folderstatus}${q}
+WHERE FolderPath=${q}${curdata[1]}${q}
+AND FolderName=${q}${curdata[2]}${q};
+
+/*
+------------------------------------------------------------------
+adding data in Actions for ${folderpath}/${foldername}
+------------------------------------------------------------------
+*/
+
+INSERT INTO Actions 
+  (
+  FolderID,
+  Creator, 
+  CreatorVersion, 
+  ActionDate, 
+  ActionName, 
+  Comment
+  )
+VALUES (
+  ${curdata[0]},
+  ${d}${creator}${d}, 
+  ${d}${creatorversion}${d}, 
+  ${d}${ts}${d}, 
+  ${d}${action}${d}, 
+  ${d}changed from ${q}${curdata[3]}${q} to ${q}${folderstatus}${q} (${a_comment})${d}
+  );
+
+-- ----------------------------------------------------------------
+
+PRAGMA foreign_keys = false;
+
+END_BLOCK
+
+# else execute file and cleanup
+cmd="sqlite3 ${d}${CONF_database_path}/${CONF_database_name}${d} ${d}.read ${CONF_database_path}/tmp/cmd_${ts}.sql${d};"
+# echo "# ${cmd}"
+eval ${cmd} && rm tmp/cmd_${ts}.sql
+
+exit 0

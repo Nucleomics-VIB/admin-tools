@@ -62,6 +62,9 @@ mkdir -p backups
 run_config=${opt_config:-"run_config.yaml"}
 process_config ${run_config}
 
+# read yaml allowed status and process it
+process_config allowed_status.yaml
+
 # check if mount is present or die
 folder_exists ${CONF_mount_point}/${CONF_mount_path} || { echo "# Storage not found, please check the 'run_config.yaml' settings and mounted drives"; exit 1; }
 
