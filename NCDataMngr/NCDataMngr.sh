@@ -105,14 +105,14 @@ if [ ! -z "${opt_actparams}" ]
 then
 
   # extract and declare variables
-  for var in "${opt_actparams[@]}"; do
+  for actparam in "${opt_actparams[@]}"; do
     # extract variable name and value
-    read name value <<< $(echo ${var} | awk -F= '{print $1, $2}')
+    read name value <<< $(echo ${actparam} | awk -F= '{print $1, $2}')
     my_vars=( ${my_vars[@]} "${name}" )
     # handle several times the same variable name
     if [ -z ${!name} ]; then
       # new variable, gets unique value
-      declare "${var}"
+      declare "${actparam}"
     else
       # variable already exists, add new value in it as array
       arr_insert ${name} ${value}

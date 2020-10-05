@@ -97,7 +97,7 @@ function validDBFields() # check if table '$1' has fields '$@' (array of field=v
 
     # check if all keys are valid
     for k in "${ar[O]}"; do
-      inArray "${k}" "${existing_fields[@]}" || { echo "# ${k} is not a valid '"${table}"' field"; }
+      inArray "${k}" "${existing_fields[@]}" || { echo "# ${k} is not a valid '"${table}"' field"; return 1; }
     done
   done
   

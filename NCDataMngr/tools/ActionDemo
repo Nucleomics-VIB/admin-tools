@@ -77,6 +77,7 @@ echo "  and contains: '"${allowed[@]}"'"
 echo
 echo "# user defined variables using -p var=value"
 echo "opt_actparams is: ${opt_actparams[@]}"
+echo "user-declared variables are: $(join_by ", " ${my_vars[@]})"
 for v in ${my_vars[@]}; do
   # test if v is an array and show value(s)
   is_arr $v && echo "${v} has values: $(arr_get ${v})" || echo "${v} has value: ${!v}"
@@ -122,32 +123,30 @@ echo "values are: ${ar[1]}";   # => 100 Me 1
 echo
 echo "# test join_by"
 echo
-echo "# joining the results with comma with join_by()"
+echo "# joining the test list with comma with join_by()"
 # do not quote the array!
 echo "$( join_by ',' ${ar[O]} )";   # => FolderID,Creator,BAD
 echo "$( join_by ',' ${ar[1]} )";   # => 100,Me,1
 echo
 echo "########### database testing #############"
 echo
-echo "# test existing_fields"
+echo "# test validDBFields"
 echo
 table="Folders"
-echo "# test if fields are valid for table '"${table}"' with validFields()"
+echo "# test if fields are valid for table '"${table}"' with validDBFields()"
 existing_fields=( $(delimited_fields "${table}" " ") )
 echo "# existing fields are: ${existing_fields[@]}"
-echo
-echo "# test validFields"
 echo
 echo "# trying with correct field names"
 test_row="FolderID=1 Creator=Me FolderName='/some/path'"
 echo "test row: ${test_row}"
-validFields Folders "${test_row}" && echo "# fields all exist in '"${table}"'"
+validDBFields Folders "${test_row}" && echo "# fields all exist in '"${table}"'"
 echo
 echo
 echo "# trying with a bad field name"
 test_row="FolderID=1 Creator=Me FolderName='/some/path' MyBAD=0"
 echo "test row: ${test_row}"
-validFields Folders "${test_row}" && echo "# fields all exist in '"${table}"'"
+validDBFields Folders "${test_row}" && echo "# fields all exist in '"${table}"'"
 
 echo
 echo "########### more to come #############"
