@@ -102,7 +102,7 @@ updating size for ${curdata[1]}/${curdata[2]}
 */
 
 UPDATE Folders
-SET FolderSize=${q}${foldersize}${q}, 
+SET FolderSize=${q}${foldersize}${q}
 WHERE FolderPath=${q}${curdata[1]}${q}
 AND FolderName=${q}${curdata[2]}${q};
 
