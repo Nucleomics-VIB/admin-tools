@@ -5,6 +5,12 @@
 #
 # commented echo can be used to debug
 # please add inline documentation to explain your code
+# example:
+# | function MyFunction() # Usage description ...
+# | {
+# | ...
+# | }
+
 # also add example ActionScript usage in your comments
 
 #--------------------------------------------------------------------------------------

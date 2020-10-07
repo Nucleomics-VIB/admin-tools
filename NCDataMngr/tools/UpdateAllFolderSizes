@@ -97,7 +97,7 @@ folder_exists ${mountpoint}/${curdata[1]}/${curdata[2]} \
 cat << END_BLOCK >> tmp/cmd_${ts}.sql
 /*
 ------------------------------------------------------------------
-updating size for '${folderpath}/${foldername}
+updating size for ${curdata[1]}/${curdata[2]}
 ------------------------------------------------------------------
 */
 
@@ -108,7 +108,7 @@ AND FolderName=${q}${curdata[2]}${q};
 
 /*
 ------------------------------------------------------------------
-adding data in Actions for ${folderpath}/${foldername}
+adding data in Actions for ${curdata[1]}/${curdata[2]}
 ------------------------------------------------------------------
 */
 

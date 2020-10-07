@@ -11,10 +11,15 @@ actionversion="1.0; 2020-09-30"
 
 ####################### no edits below this line #######################
 
-echo "#################################################"
-echo "# List of custom functions defined shared/*.sh  #"
-echo "#################################################"
+echo "###########################################################"
+echo "# List of custom functions defined shared/*_functions.sh  #"
+echo "###########################################################"
 echo "version: ${actionversion}"
+echo
+echo " | function MyFunction() # Usage description ..."
+echo " | {"
+echo " | ...code..."
+echo " | }"
 echo 
 while read funfile; do
 echo "# custom functions in ${funfile}:"
