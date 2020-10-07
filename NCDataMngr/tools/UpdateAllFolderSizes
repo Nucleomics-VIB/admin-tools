@@ -127,7 +127,7 @@ VALUES (
   ${d}${creatorversion}${d}, 
   ${d}${ts}${d}, 
   ${d}${action}${d}, 
-  ${d}comment="changed from ${q}${curdata[3]}${q} to ${q}${foldersize}${q} (${a_comment})"
+  ${d}changed from ${q}${curdata[3]}${q} to ${q}${foldersize}${q} (${a_comment})${d}
 ${d}
   );
 
