@@ -69,7 +69,7 @@ process_config allowed_status.yaml
 folder_exists ${CONF_mount_point}/${CONF_mount_path} || { echo "# Storage not found, please check the 'run_config.yaml' settings and mounted drives"; exit 1; }
 
 # check duc ssh access
-test_duc_ssh || { echo "check your ssh connection to the DUC server"; exit 1;}
+test_duc_ssh || exit 1
 
 # list allowed actions
 if [ -n "${opt_listactions}" ]

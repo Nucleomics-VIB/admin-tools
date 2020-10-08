@@ -71,26 +71,26 @@ case ${CONF_duc_access} in
 
   nuc1ssh)
     echo "# level_1 folder content details"
-    cmd="ssh ${CONF_duc_nuc1addr} ${q}${CONF_duc_nuc1exe} ls \
+    cmd="ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${CONF_duc_nuc1addr} ${q}${CONF_duc_nuc1exe} ls \
         -d ${CONF_duc_nuc1db} \
         ${CONF_duc_nuc1mnt}/${basedir}${q} \
         | sort -h -r"
     eval ${cmd}
     echo "-------------------------------------------------"
-    cmd="ssh ${CONF_duc_nuc1addr} ${q}${CONF_duc_nuc1exe} ls -D \
+    cmd="ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${CONF_duc_nuc1addr} ${q}${CONF_duc_nuc1exe} ls -D \
         -d ${CONF_duc_nuc1db} \
         ${CONF_duc_nuc1mnt}/${basedir}${q}"
     eval ${cmd};;
 
   nuc4ssh)
     echo "# level_1 folder content details"
-    cmd="ssh ${CONF_duc_nuc4addr} ${q}${CONF_duc_nuc4exe} ls \
+    cmd="ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${CONF_duc_nuc4addr} ${q}${CONF_duc_nuc4exe} ls \
         -d ${CONF_duc_nuc4db} \
         ${CONF_duc_nuc4mnt}/${CONF_mount_path}${q} \
         | sort -h -r"
     eval ${cmd}
     echo "-------------------------------------------------"
-    cmd="ssh ${CONF_duc_nuc4addr} ${q}${CONF_duc_nuc4exe} ls -D \
+    cmd="ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${CONF_duc_nuc4addr} ${q}${CONF_duc_nuc4exe} ls -D \
         -d ${CONF_duc_nuc4db} \
         ${CONF_duc_nuc4mnt}/${CONF_mount_path}${q}"
     eval ${cmd};;

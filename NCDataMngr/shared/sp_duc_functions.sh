@@ -40,14 +40,14 @@ function test_duc_ssh() # test DUC access (nuc1local|nuc1ssh|nuc4ssh)
       echo "invalid CONF_duc_access options: ${CONF_duc_access} in run_config.yaml"
       return 1
   esac
-  status=$(ssh -o BatchMode=yes -o ConnectTimeout=5 $(whoami)@${host} echo ok 2>&1)
+  status=$(ssh -i ${CONF_duc_sshkey} -o BatchMode=yes -o ConnectTimeout=5 ${CONF_duc_sshusr}@${host} echo ok 2>&1)
   if [[ $status == ok ]] ; then
     return 0
   elif [[ $status == "Permission denied"* ]] ; then
     echo "ssh returned no_auth"
     return 1
   else
-    echo "ssh error, please check your ssh connection"
+    echo "ssh error, please check your ssh connection to ${CONF_duc_access}"
     return 1
   fi
 }
@@ -80,7 +80,7 @@ function get_folder_size_nuc1() # get folder size from DUC from Nuc1 (via ssh)
   mountpoint="/mnt/nuc-transfer"
   folderpath=${1}
   # >&2 echo "${mountpoint}/${folderpath}"
-  size=$(ssh ${sshhost} '/opt/tools/duc/duc4 ls -D -b -d '${ducdb} ${mountpoint}/${folderpath} 2>&1)
+  size=$(ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${sshhost} '/opt/tools/duc/duc4 ls -D -b -d '${ducdb} ${mountpoint}/${folderpath} 2>&1)
   # handle not found in DUC
   [[ ${size} == *'Requested path not found'* ]] && { echo "NULL"; } \
     || { echo ${size} | cut -d " " -f 1; }
@@ -98,7 +98,7 @@ function get_folder_size_nuc4() # get folder size from DUC from Nuc4 via ssh (ob
   mountpoint="/mnt/nuc-transfer"
   folderpath=${1}
   # echo "${mountpoint}/${folderpath}"
-  size=$(ssh ${sshhost} 'duc ls -D -b -d '${ducdb} ${mountpoint}/${folderpath}  2>&1)
+  size=$(ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${sshhost} 'duc ls -D -b -d '${ducdb} ${mountpoint}/${folderpath}  2>&1)
   # handle not found in DUC
   [[ ${size} == *'Requested path not found'* ]] && { echo "NULL"; } \
     || { echo ${size} | cut -d " " -f 1; }
@@ -123,6 +123,6 @@ function duc_last_update_nuc1() # get last DUC update from Nuc1 (via ssh)
   sshhost="gbw-s-nuc01.luna.kuleuven.be"
   ducdb="/opt/tools/duc/nuc_transfer.db"
   mountpoint="/mnt/nuc-transfer"
-  lastupdt=$(ssh ${sshhost} '/opt/tools/duc/duc4 info -d '${ducdb} | tail -1 | awk '{print $1,$2}')
+  lastupdt=$(ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${sshhost} '/opt/tools/duc/duc4 info -d '${ducdb} | tail -1 | awk '{print $1,$2}')
   echo ${lastupdt:-"na"}
 }
