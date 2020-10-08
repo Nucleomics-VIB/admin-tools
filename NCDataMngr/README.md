@@ -69,3 +69,7 @@ Action scripts are commands that perform simple actions, they are launched by th
 Besides the integrated tools, additional utilities put here help admins and IT to manage our Storage.
 
 * **getProjectsInfo**: script to collect date and size from folders on L:/Projects
+
+
+last update 2020-10-08, v1.0
+SP@NC

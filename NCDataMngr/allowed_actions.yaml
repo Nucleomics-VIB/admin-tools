@@ -21,8 +21,7 @@ AddGridIonFolders:
 AddIlluminaFolders:
   usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Illumina Run folders (identified by their name eg. 190807_7001450_0488_AH3HVFBCX3_exp3209)
 AddPacbioFolders:
-  usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Pacbio Run folders (identified by their name: r54094_YYYYMMDD_HHMMSS_expXXXX)
-)
+  usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Pacbio Run folders (identified by their name eg. r54094_YYYYMMDD_HHMMSS_expXXXX)
 UpdateAllFolderSizes:
   usage: Scans all folderpath/foldername from DB in DUC and adapt their size in DB if changed
 SetFolderStatus:
@@ -34,10 +33,10 @@ SetDeliveryDate:
 SetProjectNumber:
   usage:  Sets the ProjectNumber(s) associated with a Folder (if more than one, use '-' eg. 'exp1234-exp1245')
 MoveArchive:
-  usage: *Moves an archived Folder from its current location to a new location on the Share provided as -p newloc=<full_share_path> (eg. to the NextCloud instance)
+  usage: (tbd) Moves an archived Folder from its current location to a new location on the Share provided as -p newloc=<full_share_path> (eg. to the NextCloud instance)
 Folder2archive:
   usage: Creates a tgz archive of a complete Folder into '${CONF_mount_archivepath}' defined in 'run_config.yaml' to prepare it for delivery
 SAV2archive:
   usage: Extracts the SAV data from an Illumina Run-folder and archives it in '${CONF_mount_savpath}' defined in 'run_config.yaml'
 MoveFolder:
-  usage: *Moves a Folder to a different place. eg. Folder arrived at End Of Life moves into '${CONF_mount_pretrash}' where it will be deleted by a super-user
+  usage: (tbd) Moves a Folder to a different place. eg. Folder arrived at End Of Life moves into '${CONF_mount_pretrash}' where it will be deleted by a super-user
