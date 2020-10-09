@@ -17,7 +17,6 @@ CreateEmptyDB:
   usage: Creates a sqlite2 database based on the dump file defined in 'run_config.yaml' as '${CONF_database_dump}'
 AddGridIonFolders:
   usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new GridIon Run folders (identified by their name eg. YYYYMMDD_HHMM_DevicePOS_FlowcellID_Code_expXXXX)
-
 AddIlluminaFolders:
   usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Illumina Run folders (identified by their name eg. 190807_7001450_0488_AH3HVFBCX3_exp3209)
 AddPacbioFolders:

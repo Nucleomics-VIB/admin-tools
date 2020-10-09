@@ -2,7 +2,7 @@
  Database structure for NCDataMngr and BigData_viewer
  Author: Stéphane Plaisance - VIB-Nucleomics Core
  database version: 1.0 - 2020-09-11
- File Encoding         : utf-8
+ File Encoding : utf-8
  REM: edit CreateEmptyDB when you change the database schema
  dbversion="1.1"
  dbcreatedate=$(date)
@@ -42,7 +42,7 @@ CREATE TABLE "Folders" (
 	 "FlowCellID" TEXT(255,0),
 	 "ProjectNR" TEXT(255,0),
 	 "CustomField1" TEXT(255,0),
- 	 "CustomField2" TEXT(255,0),
+	 "CustomField2" TEXT(255,0),
 	 "Status" TEXT(255,0),
 	 "DeliveryDate" TEXT(255,0),
 	 "Comment" TEXT(255,0)
