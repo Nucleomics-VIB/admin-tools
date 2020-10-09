@@ -2,7 +2,7 @@
 
 # script: NCDataMngr.sh
 #
-# aim: manage a number of axction scripts to create, modify and add to the NC Share database
+# aim: manage a number of action scripts to create, modify and add to the NC Share database
 
 # all dependencies absent from a standard linux OS 
 # are listed in dependencies.yaml for future workflow developments
