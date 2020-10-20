@@ -1,20 +1,21 @@
 #!/bin/bash
 
-# script: NCDataMngr.sh
+# script: NCProjectMngr.sh
 #
-# aim: manage a number of action scripts to create, modify and add to the NC Share database
+# aim: manage a number of action scripts 
+#      to create, modify and add to the NC projects database
 
 # all dependencies absent from a standard linux OS 
 # are listed in dependencies.yaml for future workflow developments
 
-# Stéphane Plaisance - VIB-Nucleomics Core - 2020-09-08 v1.0
+# Stéphane Plaisance - VIB-Nucleomics Core - 2020-10-09 v1.0
 
 ######################
 # initialisation
 ######################
 
 scriptname=$(basename "$0")
-scriptversion='1.0_2020-09-10'
+scriptversion='1.0_2020-10-09'
 
 usage='# Usage: '${scriptname}' -a <action> -p <action parameter array>
 #
@@ -29,7 +30,7 @@ while getopts "a:p:c:lh" opt; do
 		a) opt_action=${OPTARG};;
 		p) opt_actparams+=("${OPTARG}");; # READ 'ABOUT' BELOW !
 		c) opt_config=${OPTARG};;
-		l) opt_listactions=1;;
+		l) opt_listactions=1;; # => list current allowed_actions below
 		h) echo "${usage}" >&2; exit 0;;
 		\?) echo "# Invalid option: -${OPTARG}" >&2; exit 1;;
 		*) echo "# this command requires arguments, try -h" >&2; exit 1;;
@@ -62,14 +63,8 @@ mkdir -p backups
 run_config=${opt_config:-"run_config.yaml"}
 process_config ${run_config}
 
-# read yaml allowed status and process it
-process_config allowed_status.yaml
-
-# check if mount is present or die
-folder_exists ${CONF_mount_transfer_point}/${CONF_mount_transfer_path} || { echo "# Storage not found, please check the 'run_config.yaml' settings and mounted drives"; exit 1; }
-
-# check duc ssh access
-test_duc_ssh || exit 1
+# read yaml allowed terms and process it
+process_config allowed_terms.yaml
 
 # list allowed actions
 if [ -n "${opt_listactions}" ]

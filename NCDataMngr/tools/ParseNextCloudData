@@ -1,0 +1,372 @@
+#!/bin/bash
+# set -u
+
+# Author: Thomas Standaert - VIB Nucleomics Core - 2020-09-15
+# script: ParseNextCloudData
+action="ParseNextCloudData"
+actionversion="2.0; 2020-10-13"
+#
+# aim: explain how to pass parameters to an action script
+# NOTE: that complex variable values need double-quote & quote
+# please add here practical code with proper comments to help build better Actions
+# you may also add additional commented echo lines to debug code where useful
+
+########################################################################
+# Edit here if necessary
+
+# in this part, you can add user-editable variable definitions 
+# that are not already passed from the  main script
+# 
+# non-editable code should be added below the line
+#
+####################### no user edits below this line ##################
+
+#################
+# initialisation
+#################
+
+# creator
+creator=${action}
+creatorversion=${actionversion}
+
+usage="# ------------------------------------------------------------------------------
+# Usage: '${scriptname}' -a '${action}'
+# ------------------------------------------------------------------------------
+# script version '${actionversion}'"
+
+#------------------#
+# HELPER FUNCTIONS #
+#------------------#
+
+function create_SSH_tunnel()
+{
+    # REQUIREMENTS:
+    # SSH key-pair to server
+    # ssh -N -i .ssh/ubuntuwsl -L 3306:127.0.0.1:3306 u0130210@10.112.84.1 &
+
+    local ssh_sql_port="$CONF_nextcloud_nextnucport"
+    local ssh_local_sql_port="$CONF_nextcloud_localnextnucport"
+    local ssh_server="$CONF_nextcloud_nextnucaddr"
+    local ssh_key_location="${CONF_duc_sshkey}"
+    local ssh_user="${CONF_duc_sshusr}"
+
+    ssh -N -i $ssh_key_location -L $ssh_local_sql_port:127.0.0.1:$ssh_sql_port $ssh_user@$ssh_server &
+    SSH_TUNNEL_PID=$(echo $!); SSH_TUNNEL_STATUS=$(echo $?)
+
+}
+
+function get_sql_data()
+{
+    local sql_query=$1
+    local sql_output_file=$2
+    local credential_file="${CONF_nextcloud_mysqlconffile}"
+    local ssh_local_sql_port="$CONF_nextcloud_localnextnucport"
+    mysql --defaults-extra-file=$credential_file -N -h 127.0.0.1 -P $ssh_local_sql_port < $sql_query | sed 's/ +/\t/g' > $sql_output_file
+}
+
+function get_duc_data()
+{
+    local ssh_duc_server="$CONF_duc_nuc1addr"
+    local duc_db="$CONF_duc_data_nuc1db"
+    local nextcloudmnt="/mnt/nuc-data/$CONF_mount_data_nextcloudpath/"
+    local ssh_key_location="${CONF_duc_sshkey}"
+    local ssh_user="${CONF_duc_sshusr}"
+    DUC_DUMP=`ssh $ssh_user@$ssh_duc_server -i $ssh_key_location "/opt/tools/duc/duc4 ls -d $duc_db $nextcloudmnt"`
+}
+
+function get_date_from_db_string()
+{
+    local db_string=$1
+    local db_output=$2
+    local grep_result=$(grep $db_string $db_output | tail -1 | cut -f2)
+    # [ -z "$grep_result" ] && DB_DATE='N/A' || DB_DATE=$(date -d @$grep_result +'%F %T')
+    [ -z "$grep_result" ] && DB_DATE='N/A' || DB_DATE="${grep_result}"
+
+}
+
+function get_date_from_stat()
+{
+    local folder_to_check=$1
+    local modified_stat_result=$(stat $folder_to_check | grep -i modify | cut -f2,3 -d ' ')
+    # [ -z "${modified_stat_result}" ] && MODIFIED_STAT_DATE='N/A' || MODIFIED_STAT_DATE=$(date -d "${modified_stat_result}" +'%F %T')
+    # MODIFIED_STAT_DATE=$(date -d "${modified_stat_result}" +'%F %T')
+    MODIFIED_STAT_DATE=$(date "+%s" -d "${modified_stat_result}")
+
+}
+
+function get_expn_raw_projects()
+{ 
+    local raw_project=$1
+    local nextcloudmnt="$CONF_duc_data_nuc1mnt/$CONF_mount_data_nextcloudrawfastq"
+    RAW_PROJECT_STRINGS=$(find $nextcloudmnt/$raw_project -name "*.tar.gz" -exec basename {} \; | egrep -o '(exp[0-9]{4}-)*(-[0-9]{4})*' | sed 's/exp//g; s/-//g' | sort -u | tr '\n' '-' | sed 's/-$/\n/')
+}
+
+# TO-DO: Get this to work
+# function create_array_from_list()
+# {
+#     local array_name=$1
+#     local com=$2
+
+#     declare -A $array_name
+#     for constant in $com
+#     do
+#         $array_name[$constant]=1
+#     done
+
+# }
+
+function create_array_for_runs()
+{
+    local run_list=$1
+    declare -gA RUNS
+    for constant in $run_list
+    do
+        RUNS["$constant"]=1
+    done
+}
+
+function create_array_for_raws()
+{
+    local run_list=$1
+    declare -gA RAWS
+    for constant in $run_list
+    do
+        RAWS["$constant"]=1
+    done
+}
+
+function insert_actions()
+{
+    local foldername=$1
+    local -n value_hash=$2
+
+    printf "%s \n" "INSERT INTO Actions
+        (
+        FolderID,
+        Creator,
+        CreatorVersion,
+        ActionDate,
+        ActionName,
+        Comment
+        ) SELECT
+        FolderID,
+        \"${value_hash[Creator]}\",
+        \"${value_hash[CreatorVersion]}\",
+        \"${value_hash[ActionDate]}\",
+        \"${value_hash[ActionName]}\",
+        \"${value_hash[Comment]}\"
+        FROM Nextcloud_Folders
+        WHERE FolderName like \"$foldername\";"
+
+}
+
+#--------------------#
+# MAIN FUNCTIONS     #
+#--------------------#
+
+function requirement_check()
+{
+    LIST_OF_DBS=("shared" "public_links")
+    INPUT_FILE_SQL='/home/thomas/scripts/ncdatamanagement/NCDataMngr_v2/tmptools/inputfilesql'
+
+    # SSH tunnel to NextCloud Instance
+    create_SSH_tunnel && sleep 1
+    if [[ $SSH_TUNNEL_STATUS != 0 ]]
+    then
+        echo "Tunnel is not created. Exiting now!" >&2
+        exit 1
+    else
+        echo "Tunnel is created"
+    fi
+
+    file_exists $CONF_nextcloud_nextvibsqloutput || { echo "Duc NextVib File not found! Exiting"; exit 1; }
+
+    # Getting list of Runs
+    # local found_runs=$(find /mnt/GBW-0011_NUC/0001_Nextvib/ -maxdepth 2 -name '*NS500200*.tar.gz' -o -name '*M00270*.tar.gz' -o -name '*K00335*.tar.gz' -o -name '*A01044*.tar.gz' | awk 'BEGIN {FS="/"};{print $5}' | sort -u)
+    # create_array_for_runs "${found_runs}"
+    # local found_raws=$(find /mnt/GBW-0011_NUC/0001_Nextvib/ -maxdepth 4 -name '*-RawData*.tar.gz' -o -name '*-RawFastq.tar.gz' | awk 'BEGIN {FS="/"};{print $5}' | sort -u)
+    # create_array_for_raws "${found_raws}"
+}
+
+function fetch_data()
+{
+    echo "Here the data will be fetched"
+    local sql_query="$CONF_nextcloud_tmpfolder/nextcloud_db_commands.sql"
+    local nextnuc_output_file="$CONF_nextcloud_tmpfolder/nextcloud_sql_output"
+    local nextvib_output_file=$CONF_nextcloud_nextvibsqloutput
+    local nc_tmpfolder="${CONF_nextcloud_tmpfolder}"
+
+    # Fetching the sql data from nextvib and nextnuc and putting it in the 
+    # correct file depending on shared or public_links
+    echo 'Gettin the sql data'
+    get_sql_data $sql_query $nextnuc_output_file
+    echo 'Entering the loop'
+    for datatype in ${LIST_OF_DBS[@]}
+    do
+        echo "Grepping $datatype on $nextvib_output_file"
+        grep -w $datatype $nextvib_output_file > $nc_tmpfolder/$datatype
+        echo "Grepping $datatype on $nextnuc_output_file"
+        grep -w $datatype $nextnuc_output_file >> $nc_tmpfolder/$datatype
+    done
+
+    # Getting a dump from duc nextcloud
+    echo "Getting duc data"
+    get_duc_data
+}
+
+function process_data()
+{
+    echo 'Here the data will be processed'
+    local separator=','
+    local run_types=('001_Runs' '002_RawFastq' '003_PpProjects' 'PreTrash' 'Undetermined')
+    for run_type in ${run_types[@]}
+    do
+        if [[ $run_type != 'Undetermined' ]]
+        then
+            for name_path in $CONF_nextcloud_nuc1mnt/$run_type/*
+            do
+                name=$(basename "$name_path")
+                input_for_sql_file=$name$separator
+                # Project number
+                local project_number=$(echo "${name}" | egrep -o '^((exp)*([0-9]{4}-)*)*[0-9]{4}' | sed 's/exp//g')
+                [[ $run_type == "002_RawFastq" ]] && get_expn_raw_projects "${name}" && local project_number=$RAW_PROJECT_STRINGS
+                [[ -z $project_number ]] && project_number='N/A'
+                # Get size and trim run_type
+                ts_get_folder_size_nuc1 "/opt/tools/duc/nuc_data.db" "/mnt/nuc-data/0001_Nextvib/$run_type/$name"
+                trimmed_run_type=$(echo $run_type | cut -f2 -d '_')
+                input_for_sql_file=$input_for_sql_file$trimmed_run_type$separator$DUC_SIZE$separator$project_number$separator
+                # Add the dates to it
+                get_date_from_stat "$CONF_nextcloud_nuc1mnt/$run_type/"${name}""
+                input_for_sql_file=$input_for_sql_file$MODIFIED_STAT_DATE$separator
+                get_date_from_db_string "${name}" "$CONF_nextcloud_tmpfolder/shared"
+                input_for_sql_file=$input_for_sql_file$DB_DATE$separator
+                get_date_from_db_string "${name}" "$CONF_nextcloud_tmpfolder/public_links"
+                input_for_sql_file=$input_for_sql_file$DB_DATE
+                echo $input_for_sql_file >> $INPUT_FILE_SQL
+            done
+        else
+            for name_path in $CONF_nextcloud_nuc1mnt/*
+            do
+                name=$(basename "$name_path")
+                input_for_sql_file=$name$separator
+                # Project number
+                local project_number=$(echo "${name}" | egrep -o '^((exp)*([0-9]{4}-)*)*[0-9]{4}' | sed 's/exp//g')
+                [[ -z $project_number ]] && project_number='N/A'
+                # Get size
+                ts_get_folder_size_nuc1 "/opt/tools/duc/nuc_data.db" "/mnt/nuc-data/0001_Nextvib/$name"
+                input_for_sql_file=$input_for_sql_file$run_type$separator$DUC_SIZE$separator$project_number$separator
+                # Add the dates to it
+                get_date_from_stat "$CONF_nextcloud_nuc1mnt/"${name}""
+                input_for_sql_file=$input_for_sql_file$MODIFIED_STAT_DATE$separator
+                get_date_from_db_string "${name}" "$CONF_nextcloud_tmpfolder/shared"
+                input_for_sql_file=$input_for_sql_file$DB_DATE$separator
+                get_date_from_db_string "${name}" "$CONF_nextcloud_tmpfolder/public_links"
+                input_for_sql_file=$input_for_sql_file$DB_DATE
+                echo $input_for_sql_file >> $INPUT_FILE_SQL
+            done
+        fi
+    done
+
+}
+
+function insert_into_db()
+{
+    echo "Here data will be insterted into the DB"
+    local separator=','
+    local sql_input_commands="$CONF_nextcloud_tmpfolder/sql_input_commands.sql"
+    > $sql_input_commands
+    local database="$CONF_database_path/$CONF_database_name"
+    while IFS="$separator" read foldername foldertype foldersize projectnumber modifieddate deliverydate downloaddate
+    do
+        lastdate=$modifieddate
+        if [[ $deliverydate != 'N/A' ]]
+        then
+            lastdate=$deliverydate
+        fi
+        # if [[ $downloaddate != 'N/A' ]]
+        # then
+        #     lastdate=$downloaddate
+        # fi
+        printf "Inserting into DB: \n\
+            FolderName: $foldername \n\
+            FolderType: $foldertype \n\
+            FolderSize: $foldersize \n\
+            ProjectNumber: $projectnumber \n\
+            LastDate: $lastdate \n\
+            "
+
+        printf "%s \n" "INSERT OR IGNORE INTO NextCloud_Folders
+            (
+            FolderName,
+            FolderType,
+            FolderSize,
+            ProjectNumber,
+            LastDate
+            )
+            VALUES
+            (
+            \"$foldername\", 
+            \"$foldertype\", 
+            \"$foldersize\", 
+            \"$projectnumber\",
+            \"$lastdate\"
+            );" >> $sql_input_commands
+
+        # Declare actions to be added in a hash table
+        printf "Inserting actions: \n"
+        declare -A action_table=(
+            ["Creator"]="$action"
+            ["CreatorVersion"]="$actionversion"
+            ["ActionDate"]="${modifieddate}"
+            ["ActionName"]="Modified"
+            ["Comment"]="Modified the folder"
+        )
+        insert_actions $foldername action_table | tee -a $sql_input_commands
+        if [[ $deliverydate != 'N/A' ]]
+        then
+            declare -A action_table=(
+                ["Creator"]="$action"
+                ["CreatorVersion"]="$actionversion"
+                ["ActionDate"]="${deliverydate}"
+                ["ActionName"]="Shared"
+                ["Comment"]="Shared the folder"
+            )
+            insert_actions $foldername action_table | tee -a $sql_input_commands
+        fi
+        if [[ $downloaddate != 'N/A' ]]
+        then
+            declare -A action_table=(
+                ["Creator"]="$action"
+                ["CreatorVersion"]="$actionversion"
+                ["ActionDate"]="${downloaddate}"
+                ["ActionName"]="Downloaded"
+                ["Comment"]="Downloaded the folder"
+            )
+            insert_actions $foldername action_table | tee -a $sql_input_commands
+        fi
+
+    done < $INPUT_FILE_SQL
+    sqlite3 $database < $sql_input_commands
+}
+
+function clean_up()
+{
+    tmpfolder=$CONF_nextcloud_tmpfolder
+    kill $SSH_TUNNEL_PID
+    for rmfile in $(ls $CONF_nextcloud_tmpfolder --ignore="*.sql" --ignore="output.txt")
+    do
+        echo $rmfile 'will be removed'
+        rm "$tmpfolder/$rmfile"
+    done
+}
+
+#---------------#
+# MAIN          #
+#---------------#
+requirement_check
+fetch_data
+process_data
+insert_into_db
+clean_up
+
+exit 0

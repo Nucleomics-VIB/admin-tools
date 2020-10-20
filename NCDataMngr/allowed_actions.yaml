@@ -8,7 +8,7 @@ ActionDemo:
 ListFunctions:
   usage: list custom functions in shared/*_functions.sh files
 ShareStatus:
-  usage: Shows the current usage of the share defined in 'run_config.yaml' as '${CONF_mount_point}/${CONF_mount_path}'; adding '-p <subfolder>' allows going deeper (eg -p NovaSeq6000)
+  usage: Shows the current usage of the share defined in 'run_config.yaml' as '${CONF_mount_transfer_point}/${CONF_mount_transfer_path}'; adding '-p <subfolder>' allows going deeper (eg -p NovaSeq6000)
 DBListFields:
   usage: Shows a list of all fields defined in the DB tables (non *View tables); adding '-p details' shows the table design details
 ListOptions:
@@ -16,11 +16,11 @@ ListOptions:
 CreateEmptyDB:
   usage: Creates a sqlite2 database based on the dump file defined in 'run_config.yaml' as '${CONF_database_dump}'
 AddGridIonFolders:
-  usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new GridIon Run folders (identified by their name eg. YYYYMMDD_HHMM_DevicePOS_FlowcellID_Code_expXXXX)
+  usage: Browses '${CONF_mount_transfer_point}/${CONF_mount_transfer_path}' and adds database records for new GridIon Run folders (identified by their name eg. YYYYMMDD_HHMM_DevicePOS_FlowcellID_Code_expXXXX)
 AddIlluminaFolders:
-  usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Illumina Run folders (identified by their name eg. 190807_7001450_0488_AH3HVFBCX3_exp3209)
+  usage: Browses '${CONF_mount_transfer_point}/${CONF_mount_transfer_path}' and adds database records for new Illumina Run folders (identified by their name eg. 190807_7001450_0488_AH3HVFBCX3_exp3209)
 AddPacbioFolders:
-  usage: Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Pacbio Run folders (identified by their name eg. r54094_YYYYMMDD_HHMMSS_expXXXX)
+  usage: Browses '${CONF_mount_transfer_point}/${CONF_mount_transfer_path}' and adds database records for new Pacbio Run folders (identified by their name eg. r54094_YYYYMMDD_HHMMSS_expXXXX)
 UpdateAllFolderSizes:
   usage: Scans all folderpath/foldername from DB in DUC and adapt their size in DB if changed
 SetFolderStatus:
@@ -34,8 +34,10 @@ SetProjectNumber:
 MoveArchive:
   usage: (tbd) Moves an archived Folder from its current location to a new location on the Share provided as -p newloc=<full_share_path> (eg. to the NextCloud instance)
 Folder2archive:
-  usage: Creates a tgz archive of a complete Folder into '${CONF_mount_archivepath}' defined in 'run_config.yaml' to prepare it for delivery
+  usage: Creates a tgz archive of a complete Folder into '${CONF_mount_transfer_archivepath}' defined in 'run_config.yaml' to prepare it for delivery
 SAV2archive:
-  usage: Extracts the SAV data from an Illumina Run-folder and archives it in '${CONF_mount_savpath}' defined in 'run_config.yaml'
+  usage: Extracts the SAV data from an Illumina Run-folder and archives it in '${CONF_mount_transfer_savpath}' defined in 'run_config.yaml'
 MoveFolder:
-  usage: (tbd) Moves a Folder to a different place. eg. Folder arrived at End Of Life moves into '${CONF_mount_pretrash}' where it will be deleted by a super-user
+  usage: (tbd) Moves a Folder to a different place. eg. Folder arrived at End Of Life moves into '${CONF_mount_transfer_pretrash}' where it will be deleted by a super-user
+ParseNextCloudData:
+  usage: Parses the Nextcloud files and insert them into the NextCloudDadaMngrDB together with Duc info

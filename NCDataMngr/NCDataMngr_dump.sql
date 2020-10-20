@@ -1,26 +1,32 @@
 /*
  Database structure for NCDataMngr and BigData_viewer
- Author: Stéphane Plaisance - VIB-Nucleomics Core
- database version: 1.0 - 2020-09-11
+ Authors: Stéphane Plaisance - VIB-Nucleomics Core
+          Thomas Standaert - VIB-Nucleopmics Core
+ database version: 1.0 - 2020-10-20
  File Encoding : utf-8
  REM: edit CreateEmptyDB when you change the database schema
  dbversion="1.1"
  dbcreatedate=$(date)
- last edit 2020-09-30; version 1.1
+ last edit 2020-10-20; version 1.2
 */
 
 PRAGMA foreign_keys = false;
 
 -- ----------------------------
---  Table structure for custom
+--  Table structure for Actions
 -- ----------------------------
-DROP TABLE IF EXISTS "Variables";
-CREATE TABLE "Variables" (
-	 "VarID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	 "name" TEXT(255,0),
-	 "value" TEXT(255,0)
+DROP TABLE IF EXISTS "Actions";
+CREATE TABLE "Actions" (
+	 "FolderID" INTEGER NOT NULL,
+	 "ActionID" INTEGER NOT NULL PRIMARY KEY,
+	 "Creator" TEXT(255,0),
+	 "CreatorVersion" TEXT(255,0),
+	 "ActionDate" TEXT,
+	 "ActionName" TEXT(255,0),
+	 "Comment" TEXT(255,0),
+	CONSTRAINT "Folders2Actions" FOREIGN KEY ("FolderID") REFERENCES "Folders" ("FolderID") ON DELETE CASCADE ON UPDATE CASCADE,
+	FOREIGN KEY("FolderID") REFERENCES "NextCloud_Folders"("FolderID") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("Variables", '0');
 
 -- ----------------------------
 --  Table structure for Folders
@@ -47,23 +53,31 @@ CREATE TABLE "Folders" (
 	 "DeliveryDate" TEXT(255,0),
 	 "Comment" TEXT(255,0)
 );
-INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("Folders", '0');
 
--- ----------------------------
---  Table structure for Actions
--- ----------------------------
-DROP TABLE IF EXISTS "Actions";
-CREATE TABLE "Actions" (
-	 "FolderID" INTEGER NOT NULL,
-	 "ActionID" INTEGER NOT NULL PRIMARY KEY,
-	 "Creator" TEXT(255,0),
-	 "CreatorVersion" TEXT(255,0),
-	 "ActionDate" TEXT,
-	 "ActionName" TEXT(255,0),
-	 "Comment" TEXT(255,0),
-	CONSTRAINT "Folders2Actions" FOREIGN KEY ("FolderID") REFERENCES "Folders" ("FolderID") ON DELETE CASCADE ON UPDATE CASCADE
+-- --------------------------------------
+--  Table structure for NextCloud_Folders
+-- --------------------------------------
+DROP TABLE IF EXISTS "NextCloud_Folders";
+CREATE TABLE "NextCloud_Folders" (
+	"FolderID"	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	"FolderName"	TEXT NOT NULL UNIQUE,
+	"FolderType"	TEXT NOT NULL CHECK("FolderType" IN ("Runs", "RawFastq", "PpProjects", "PreTrash", "Undetermined")),
+	"FolderSize"	INTEGER NOT NULL,
+	"ProjectNumber"	TEXT NOT NULL DEFAULT 'N/A',
+	"Protection"	INTEGER NOT NULL DEFAULT 0,
+	"LastDate"	INTEGER
 );
-INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("Actions", '0');
+
+-- ------------------------------
+--  Table structure for Variables
+-- ------------------------------
+DROP TABLE IF EXISTS "Variables";
+CREATE TABLE "Variables" (
+	 "VarID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	 "name" TEXT(255,0),
+	 "value" TEXT(255,0)
+);
+
 
 -- ----------------------------
 --  Table structure for version
@@ -73,6 +87,21 @@ CREATE TABLE "version" (
 	 "vnum" text,
 	 "vdate" text
 );
+
+
+-- ----------------------------
+--  set key initial values     -
+-- ----------------------------
+
+INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("Actions", '0');
+INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("Folders", '0');
+INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("NextCloud_Folders", '20000');
+/*BEGIN TRANSACTION;
+UPDATE sqlite_sequence SET seq = 20000 WHERE name = 'NextCloud_Folders';
+INSERT INTO sqlite_sequence (name,seq) SELECT 'NextCloud_Folders', 20000 WHERE NOT EXISTS 
+           (SELECT changes() AS change FROM sqlite_sequence WHERE change <> 0);
+COMMIT;*/
+INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("Variables", '0');
 INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("version", '0');
 
 -- ----------------------------
@@ -101,16 +130,16 @@ Folders
 ORDER BY
 Folders.FolderID ASC;
 
+-- ----------------------------
+--  Indexes structure for table Actions
+-- ----------------------------
+CREATE INDEX "idx_Actions_FolderID" ON Actions ("FolderID" ASC);
+CREATE UNIQUE INDEX "idx_Actions_FolderID_ActionName" ON Actions ("FolderID" ASC, "ActionName");
 
 -- ----------------------------
 --  Indexes structure for table Folders
 -- ----------------------------
 CREATE UNIQUE INDEX "idx_Folders_FolderPath_FolderName" on Folders ( "FolderPath", "FolderName" );
 
--- ----------------------------
---  Indexes structure for table Actions
--- ----------------------------
-CREATE INDEX "idx_Actions_FolderID" ON Actions ("FolderID" ASC);
-CREATE UNIQUE INDEX "idx_Actions_FolderID_Creator" ON Actions ("FolderID" ASC, "Creator");
 
 PRAGMA foreign_keys = true;

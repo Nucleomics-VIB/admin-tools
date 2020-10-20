@@ -2,7 +2,7 @@
 
 # script: CreateEmptyDB
 action="CreateEmptyDB"
-actionversion="1.1; 2020-10-20"
+actionversion="1.0; 2020-09-11"
 #
 # aim: create en empty sqlite3 database from the provided dump (structure only)
 # note: if the output exists, first rename the existing file with timestamp
@@ -11,14 +11,15 @@ actionversion="1.1; 2020-10-20"
 ########################################################################
 # Edit here if necessary
 
+dbversion="1.1"
+dbcreatedate=$(date)
+
 ####################### no edits below this line #######################
 
 # sqlite3 variables
-databasepath=$CONF_database_path
-databasename=$CONF_database_name
-dbversion=$CONF_database_version
-dbcreatedate=$(date)
-databasedump=$CONF_database_dump
+databasepath=$CONF_database_path;  # "/Users/u0002316/databases"
+databasename=$CONF_database_name;  # "NCDataMngr.sqlite"
+databasedump=$CONF_database_dump;  # "NCDataMngr_dump.sql"
 
 # date-tag
 actiondate=$(date +%s)

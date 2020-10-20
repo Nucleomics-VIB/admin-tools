@@ -1,0 +1,20 @@
+## run_config.yaml
+# global definitions parsed at main script startup
+# leading to definition of variables accessible through all sub-commands
+# some of the variables below are used in custom functions and/or Action scripts 
+# and should be present to get a functional program
+
+# example
+#----------------
+#more:
+#  option1: value1
+#  option2: value2
+#----------------
+# is evaluated at runtime:
+# CONF_more_option1=value1 (callable from ${CONF_more_option1})
+# CONF_more_option2=value2 (callable from ${CONF_more_option1})
+
+database:
+  path: "/Users/u0002316/git_repos/Nucleomics-VIB/admin-tools/SonOfYamad/NCProjectMngr"
+  name: "NCProjectDB.sqlite"
+  dump: "NCProjectDB_dump.sqlite"

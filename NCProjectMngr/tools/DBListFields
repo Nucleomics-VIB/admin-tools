@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# script: DBListFields
+action="DBListFields"
+actionversion="1.0; 2020-09-11"
+#
+# aim: Shows a list of all fields defined in all (non *View) tables
+#      adding '-p details' shows the table design details
+########################################################################
+# Edit here if necessary
+
+
+####################### no edits below this line #######################
+
+# creator
+creator=${action}
+creatorversion=${actionversion}
+
+echo "#################################################"
+echo "# list the fields the database tables           #"
+echo "-------------------------------------------------"
+
+echo "# script name: ${action}"
+echo "# version: ${actionversion}"
+
+echo
+echo "#################################################"
+echo "# database version $(DBversion)"
+echo "-------------------------------------------------"
+
+# fetch the current list of tables (excluding *View tables)
+for table in $( sqlite3 ${CONF_database_path}/${CONF_database_name} '.tables' | tr " " "\n" | grep -v "View" ); do
+
+echo
+echo "-------------------------------------------------"
+tbl_fields=($(delimited_fields ${table} " "))
+echo "# ${#tbl_fields[@]} fields found in ${table}"
+echo "${tbl_fields[@]}"
+
+if [ "${opt_actparams}" == "details" ]; then
+  echo
+  echo "# ${table} details"
+  echo "----------------"
+  listfields ${table}
+fi
+
+done
+
+echo "-------------------------------------------------"

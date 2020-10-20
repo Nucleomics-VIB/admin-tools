@@ -5,7 +5,7 @@ action="AddIlluminaFolders"
 actionversion="1.0; 2020-09-11"
 #
 # aim: add new records in the database for all new Illumina Folders found in
-# ${CONF_mount_point}/${CONF_mount_path} 
+# ${CONF_mount_transfer_point}/${CONF_mount_transfer_path} 
 # or for one or more named Illumina Folders given by -p targets=<Foldername>
 # default target folders are taken from  ${CONF_illumina_folderarray}
 #
@@ -74,8 +74,8 @@ PRAGMA foreign_keys = false;
 databasepath=$CONF_database_path
 databasename=$CONF_database_name
 databasedump=$CONF_database_dump
-mountpoint=$CONF_mount_point
-mountpath=$CONF_mount_path
+mountpoint=$CONF_mount_transfer_point
+mountpath=$CONF_mount_transfer_path
 
 # date-tag
 actiondate=$(date +%s); # seconds since 1970-01-01

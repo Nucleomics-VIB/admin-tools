@@ -1,0 +1,23 @@
+## allowed_actions.yaml
+# list of allowed actions names
+# add new actions after creating the corresponding script
+# add a short usage text to explain what the action is for
+
+ActionDemo:
+  usage: Shows a simple example for passing variables to an Action script
+ListFunctions:
+  usage: list custom functions in shared/*_functions.sh files
+DBListFields:
+  usage: Shows a list of all fields defined in the DB tables (non *View tables); adding '-p details' shows the table design details
+ListOptions:
+  usage: Shows the list of all variables defined in 'run_config.yaml'
+CreateEmptyDB:
+  usage: Creates a sqlite2 database based on the dump file defined in 'run_config.yaml' as '${CONF_database_dump}'
+SetProjectStatus:
+  usage: Changes the status of a project with one of the choices from 'allowed_status.yaml'
+SetProtection:
+  usage: Changes the protection status of a Folder record (value can be 0 for unprotected or 1 for protected)
+SetDeliveryDate:
+  usage: Sets the Delivery Date for a Folder (the folder was provided to the customer)
+SetProjectNumber:
+  usage:  Sets the ProjectNumber(s) associated with a Folder (if more than one, use '-' eg. 'exp1234-exp1245')

@@ -1,12 +1,13 @@
 #!/bin/bash
 
-# script: SetFolderProtection
-action="SetFolderProtection"
+# script: SetProjectNumber
+action="SetProjectNumber"
 actionversion="1.0; 2020-10-02"
 #
-# aim: manually set Folder Protection bit for a given FolderName + FolderName
+# aim: manually set ProjectNumber for a given FolderName + FolderName
 
-usage='# Usage: '${scriptname}' -a '${action}' -p folderpath=<FolderPath> -p foldername=<FolderName> -p protection=<0/1>
+usage='# Usage: '${scriptname}' -a '${action}' -p folderpath=<FolderPath> -p foldername=<FolderName> -p projectnumber=<expXXXX-expYYYY ('null' for blank)>
+optionally add -p comment=<comment>
 # script version '${actionversion}
 
 ########################################################################
@@ -20,8 +21,8 @@ a_comment=${comment:-""}
 # sqlite3 and share variables
 databasepath=${CONF_database_path}
 databasename=${CONF_database_name}
-mountpoint=${CONF_mount_transfer_point}
-mountpath=${CONF_mount_transfer_path}
+mountpoint=${CONF_mount_point}
+mountpath=${CONF_mount_path}
 
 # timestamp for tmp file
 ts=$(date +%s)
@@ -47,30 +48,32 @@ then
   exit 1
 fi
 
-# Status provided via ${opt_actparams[@]} ?
-if [ -z "${protection}" ]
+# ProjectNumber provided via ${opt_actparams[@]} ?
+if [ -z "${projectnumber}" ]
 then
-  echo "# no Protection provided: 0=unprotected | 1=protected"
+  echo "# no ProjectNumber provided"
   echo "${usage}"
   exit 1
 fi
 
-# check valid status against ${CONF_folder_status[@]}
-allowed_values=( 0 1 )
-inArray ${protection} ${allowed_values[@]} || \
-  { >&2 echo "# ${q}${protection}${q} is not a valid value (0|1)"; exit 1; }
-
 # check folderpath+foldername exists and get current status
-cmd="sqlite3 ${d}${databasepath}/${databasename}${d} ${q}SELECT FolderID, FolderPath, FolderName, Protection FROM Folders WHERE FolderPath=${d}${folderpath}${d} AND FolderName=${d}${foldername}${d};${q}"
+cmd="sqlite3 ${d}${databasepath}/${databasename}${d} ${q}SELECT FolderID, FolderPath, FolderName, ProjectNR FROM Folders WHERE FolderPath=${d}${folderpath}${d} AND FolderName=${d}${foldername}${d};${q}"
 # echo "# ${cmd}"
 row=$(eval ${cmd} )
 # split row into array
 curdata=( $(split2array ${row}) )
 
-# test if Protection is unchanged
-[ "${protection}" == "${curdata[3]}" ] && { >&2 echo "already in that state"; exit 0; }
+curprojnum=${curdata[3]:-""}
 
-comment="changed from ${q}${curdata[3]}${q} to ${q}${protection}${q} (${a_comment})"
+case ${projectnumber} in
+  null)
+      setprojnum="" ;;
+  *) 
+      setprojnum=${projectnumber} ;;
+esac
+
+# test if ProjectNumber is unchanged
+[ "${setprojnum}" == "${curprojnum}" ] && { >&2 echo "# already set to this Project(s), quitting"; exit 0; }
 
 # prepare a SQL script to set the Folder Status in the DB 
 # and add action record in a single sqlite3 session
@@ -94,7 +97,7 @@ updating size for '${folderpath}/${foldername}
 */
 
 UPDATE Folders
-SET Protection=${q}${protection}${q}
+SET ProjectNR=${q}${setprojnum}${q}
 WHERE FolderPath=${q}${curdata[1]}${q}
 AND FolderName=${q}${curdata[2]}${q};
 
@@ -119,7 +122,7 @@ VALUES (
   ${d}${creatorversion}${d}, 
   ${d}${ts}${d}, 
   ${d}${action}${d}, 
-  ${d}${comment}${d}
+  ${d}changed from ${q}${curprojnum}${q} to ${q}${setprojnum}${q} (${a_comment})${d}
   );
 
 -- ----------------------------------------------------------------

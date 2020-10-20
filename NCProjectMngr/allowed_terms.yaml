@@ -1,0 +1,14 @@
+## allowed_status.yaml
+# list of allowed status names
+# add new statuses with parsimony
+
+project:
+  status: "initiated wetlab sequencing analysis shared delivered paused aborted terminated invoiced paid"
+
+action:
+  status: "submitted running done failed"
+
+platforms: "BioAnalyser Covaris Library_Prep Sample_QC Unknown HiSeq2500 HiSeq4000 MiSeq NextSeq NovaSeq  ONT_GridION PacBio_Sequel Bioinformatics MGI_DNBSEQ-G400"
+
+species: "human mouse mammals animal plant eukaryot bacteria prokaryot virus phage syntetic"
+

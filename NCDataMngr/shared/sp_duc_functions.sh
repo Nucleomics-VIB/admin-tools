@@ -62,7 +62,7 @@ function get_folder_size_local() # get folder size from DUC from Nuc1 (local)
   mountpoint="/mnt/nuc-transfer"
   folderpath=${1}
   size=$(duc ls -D -b \
-    -d "${CONF_duc_nuc1db}" "${CONF_duc_nuc1mnt}/${CONF_mount_path}/${folderpath}"  2>&1)
+    -d "${CONF_duc_nuc1db}" "${CONF_duc_nuc1mnt}/${CONF_mount_transfer_path}/${folderpath}"  2>&1)
   # handle not found in DUC
   [[ ${size} == *'Requested path not found'* ]] && { echo "NULL"; } \
     || { echo ${size} | cut -d " " -f 1; }

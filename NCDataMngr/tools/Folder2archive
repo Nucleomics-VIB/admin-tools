@@ -4,7 +4,7 @@
 action="Folder2archive"
 actionversion="1.0; 2020-10-02"
 #
-# aim: create Illumina Run folder archive and save it to ${CONF_mount_archivepath}
+# aim: create Illumina Run folder archive and save it to ${CONF_mount_transfer_archivepath}
 
 usage='# Usage: '${scriptname}' -a '${action}' -p folderpath=<FolderPath> -p foldername=<FolderName> -p expnumber=<expNR>
 # script version '${actionversion}
@@ -23,9 +23,9 @@ folderstatus="run_archived"
 # sqlite3 and share variables
 databasepath=${CONF_database_path}
 databasename=${CONF_database_name}
-mountpoint=${CONF_mount_point}
-mountpath=${CONF_mount_path}
-mountarchivepath=${CONF_mount_archivepath}
+mountpoint=${CONF_mount_transfer_point}
+mountpath=${CONF_mount_transfer_path}
+mountarchivepath=${CONF_mount_transfer_archivepath}
 
 # timestamp for tmp file
 ts=$(date +%s)

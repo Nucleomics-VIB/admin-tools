@@ -5,7 +5,7 @@ action="AddPacbioFolders"
 actionversion="1.0; 2020-09-28"
 #
 # aim: add/update records in the database for all Illumina Folders found in
-# ${CONF_mount_point}/${CONF_mount_path}
+# ${CONF_mount_transfer_point}/${CONF_mount_transfer_path}
 # default folders from  ${CONF_illumina_folderarray}
 #
 # NOTE: will only scan one level and valid folders based on their name
@@ -53,8 +53,8 @@ PRAGMA foreign_keys = false;
 databasepath=${CONF_database_path}
 databasename=${CONF_database_name}
 databasedump=${CONF_database_dump}
-mountpoint=${CONF_mount_point}
-mountpath=${CONF_mount_path}
+mountpoint=${CONF_mount_transfer_point}
+mountpath=${CONF_mount_transfer_path}
 platform=${CONF_pacbio_sequel}
 
 # date-tag

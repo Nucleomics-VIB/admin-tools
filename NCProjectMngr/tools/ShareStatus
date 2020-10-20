@@ -5,7 +5,7 @@ action="DBListFields"
 actionversion="1.0; 2020-09-11"
 #
 # aim: Prints the storage usage status 
-# for ${CONF_mount_transfer_point}/${CONF_mount_transfer_path} (aka THE Share)
+# for ${CONF_mount_point}/${CONF_mount_path} (aka THE Share)
 # adding -p <subfolder> allows going deeper (eg -p NovaSeq6000)
 
 ########################################################################
@@ -48,7 +48,7 @@ usage='# Usage: '${scriptname}' -a ${action} {nuc1ssh|nuc1local|nuc4ssh} -p <sub
 # main code
 ######################
 
-basedir=${CONF_mount_transfer_path}/${opt_actparams:-""}
+basedir=${CONF_mount_path}/${opt_actparams:-""}
 
 echo "---------------------------------------------------------------------------------"
 echo "# Share occupancy of /${basedir} from DUC via ${CONF_duc_access} access"
@@ -60,13 +60,13 @@ case ${CONF_duc_access} in
     echo "# level_1 folder content details"
     cmd="${CONF_duc_nuc1exe} ls \
         -d ${CONF_duc_nuc1db} \
-        ${CONF_duc_nuc1mnt}/${CONF_mount_transfer_path} \
+        ${CONF_duc_nuc1mnt}/${CONF_mount_path} \
         | sort -h -r"
     eval ${cmd}
     echo "-------------------------------------------------"
     cmd="${CONF_duc_nuc1exe} ls -D \
         -d ${CONF_duc_nuc1db} \
-        ${CONF_duc_nuc1mnt}/${CONF_mount_transfer_path}"
+        ${CONF_duc_nuc1mnt}/${CONF_mount_path}"
     eval ${cmd};;
 
   nuc1ssh)
@@ -86,13 +86,13 @@ case ${CONF_duc_access} in
     echo "# level_1 folder content details"
     cmd="ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${CONF_duc_nuc4addr} ${q}${CONF_duc_nuc4exe} ls \
         -d ${CONF_duc_nuc4db} \
-        ${CONF_duc_nuc4mnt}/${CONF_mount_transfer_path}${q} \
+        ${CONF_duc_nuc4mnt}/${CONF_mount_path}${q} \
         | sort -h -r"
     eval ${cmd}
     echo "-------------------------------------------------"
     cmd="ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${CONF_duc_nuc4addr} ${q}${CONF_duc_nuc4exe} ls -D \
         -d ${CONF_duc_nuc4db} \
-        ${CONF_duc_nuc4mnt}/${CONF_mount_transfer_path}${q}"
+        ${CONF_duc_nuc4mnt}/${CONF_mount_path}${q}"
     eval ${cmd};;
 
        *)

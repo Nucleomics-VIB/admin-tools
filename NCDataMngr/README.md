@@ -28,16 +28,16 @@ Action scripts are commands that perform simple actions, they are launched by th
 ### T:/0003_Runs Storage scanning actions
 
 * ShareStatus
-  "Shows the current usage of the share defined in 'run_config.yaml' as '${CONF_mount_point}/${CONF_mount_path}'; adding '-p <subfolder>' allows going deeper (eg -p NovaSeq6000)"
+  "Shows the current usage of the share defined in 'run_config.yaml' as '${CONF_mount_transfer_point}/${CONF_mount_transfer_path}'; adding '-p <subfolder>' allows going deeper (eg -p NovaSeq6000)"
 
 * AddGridIonFolders
-  "Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new GridIon Run folders (identified by their name eg. YYYYMMDD_HHMM_DevicePOS_FlowcellID_Code_expXXXX)"
+  "Browses '${CONF_mount_transfer_point}/${CONF_mount_transfer_path}' and adds database records for new GridIon Run folders (identified by their name eg. YYYYMMDD_HHMM_DevicePOS_FlowcellID_Code_expXXXX)"
 
 * AddIlluminaFolders
-  "Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Illumina Run folders (identified by their name eg. 190807_7001450_0488_AH3HVFBCX3_exp3209)"
+  "Browses '${CONF_mount_transfer_point}/${CONF_mount_transfer_path}' and adds database records for new Illumina Run folders (identified by their name eg. 190807_7001450_0488_AH3HVFBCX3_exp3209)"
 
 * AddPacbioFolders
-  "Browses '${CONF_mount_point}/${CONF_mount_path}' and adds database records for new Pacbio Run folders (identified by their name: r54094_YYYYMMDD_HHMMSS_expXXXX)"
+  "Browses '${CONF_mount_transfer_point}/${CONF_mount_transfer_path}' and adds database records for new Pacbio Run folders (identified by their name: r54094_YYYYMMDD_HHMMSS_expXXXX)"
 
 * UpdateAllFolderSizes
   "Scans all folderpath/foldername from DB in DUC and adapt their size in DB if changed"
@@ -45,10 +45,10 @@ Action scripts are commands that perform simple actions, they are launched by th
 ### Storage modifying actions
 
 * Folder2archive
-  "Creates a tgz archive of a complete Folder into '${CONF_mount_archivepath}' defined in 'run_config.yaml' to prepare it for delivery"
+  "Creates a tgz archive of a complete Folder into '${CONF_mount_transfer_archivepath}' defined in 'run_config.yaml' to prepare it for delivery"
 
 * SAV2archive
-  "Extracts the SAV data from an Illumina Run-folder and archives it in '${CONF_mount_savpath}' defined in 'run_config.yaml'"
+  "Extracts the SAV data from an Illumina Run-folder and archives it in '${CONF_mount_transfer_savpath}' defined in 'run_config.yaml'"
 
 ### Database editing actions
 

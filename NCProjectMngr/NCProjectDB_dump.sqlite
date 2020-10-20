@@ -1,0 +1,268 @@
+/*
+ Navicat Premium Data Transfer
+
+ Source Server         : SOY_v1
+ Source Server Type    : SQLite
+ Source Server Version : 3012001
+ Source Database       : main
+
+ Target Server Type    : SQLite
+ Target Server Version : 3012001
+ File Encoding         : utf-8
+
+ Date: 10/09/2020 18:01:29 PM
+*/
+
+PRAGMA foreign_keys = false;
+
+-- ----------------------------
+--  Table structure for Contacts
+-- ----------------------------
+DROP TABLE IF EXISTS "Contacts";
+CREATE TABLE "Contacts" (
+	 "ContactID" INTEGER NOT NULL,
+	 "Type" TEXT,
+	 "Affiliation" TEXT,
+	 "PI_name" TEXT,
+	 "PI_mail" TEXT,
+	 "Wetlab_name" TEXT,
+	 "Wetlab_mail" TEXT,
+	 "Analyst_name" TEXT,
+	 "Analyst_mail" TEXT,
+	 "Comments" TEXT,
+	PRIMARY KEY("ContactID")
+);
+
+-- ----------------------------
+--  Table structure for Priorities
+-- ----------------------------
+DROP TABLE IF EXISTS "Priorities";
+CREATE TABLE "Priorities" (
+	 "PriorityID" integer NOT NULL,
+	 "Priority" TEXT,
+	PRIMARY KEY("PriorityID")
+);
+
+-- ----------------------------
+--  Records of Priorities
+-- ----------------------------
+BEGIN;
+INSERT INTO "Priorities" VALUES (1, 'R&D');
+INSERT INTO "Priorities" VALUES (2, 'Standard_NP');
+INSERT INTO "Priorities" VALUES (3, 'Standard_VIB');
+INSERT INTO "Priorities" VALUES (4, 'Standard_P');
+INSERT INTO "Priorities" VALUES (5, 'FastT_NP');
+INSERT INTO "Priorities" VALUES (6, 'FastT_VIB');
+INSERT INTO "Priorities" VALUES (7, 'FastT_P');
+INSERT INTO "Priorities" VALUES (8, 'Unknown');
+COMMIT;
+
+-- ----------------------------
+--  Table structure for ProjectType
+-- ----------------------------
+DROP TABLE IF EXISTS "ProjectType";
+CREATE TABLE "ProjectType" (
+	 "TypeID" INTEGER NOT NULL,
+	 "Type" TEXT,
+	PRIMARY KEY("TypeID")
+);
+
+-- ----------------------------
+--  Records of ProjectType
+-- ----------------------------
+BEGIN;
+INSERT INTO "ProjectType" VALUES (1, 'BioAnalyser');
+INSERT INTO "ProjectType" VALUES (2, 'Bioinformatics');
+INSERT INTO "ProjectType" VALUES (3, 'Covaris');
+INSERT INTO "ProjectType" VALUES (4, 'HiSeq2500');
+INSERT INTO "ProjectType" VALUES (5, 'HiSeq4000');
+INSERT INTO "ProjectType" VALUES (6, 'Library_Prep');
+INSERT INTO "ProjectType" VALUES (7, 'MGI_DNBSEQ-G400');
+INSERT INTO "ProjectType" VALUES (8, 'MiSeq');
+INSERT INTO "ProjectType" VALUES (9, 'NextSeq');
+INSERT INTO "ProjectType" VALUES (10, 'NovaSeq');
+INSERT INTO "ProjectType" VALUES (11, 'ONT_GridION');
+INSERT INTO "ProjectType" VALUES (12, 'PacBio_Sequel');
+INSERT INTO "ProjectType" VALUES (13, 'Sample_QC');
+INSERT INTO "ProjectType" VALUES (14, 'Unknown');
+COMMIT;
+
+-- ----------------------------
+--  Table structure for Projects
+-- ----------------------------
+DROP TABLE IF EXISTS "Projects";
+CREATE TABLE "Projects" (
+	 "ProjectID" INTEGER NOT NULL,
+	 "TypeID" INTEGER,
+	 "PlatformID" integer,
+	 "Title" TEXT,
+	 "Description" TEXT,
+	 "PriorityID" integer,
+	 "ContactID" integer,
+	 "QuoteNumber" text,
+	 "ExpNumber" INTEGER,
+	 "Resequencing" integer,
+	 "Status" TEXT,
+	 "Start" TEXT,
+	 "Delivery" TEXT,
+	 "Invoicing" TEXT,
+	 "Payment" TEXT,
+	 "Comments" TEXT,
+	PRIMARY KEY("ProjectID"),
+	CONSTRAINT "ContactID2Contacts" FOREIGN KEY ("ContactID") REFERENCES "Contacts" ("ContactID") ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT "ProjectID2Samples" FOREIGN KEY ("ProjectID") REFERENCES "Samples" ("ProjectID") ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT "PriorityID2Priorities" FOREIGN KEY ("PriorityID") REFERENCES "Priorities" ("PriorityID") ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT "TypeID2ProjectType" FOREIGN KEY ("TypeID") REFERENCES "ProjectType" ("TypeID") ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT "ProjectID2ProjectDoc" FOREIGN KEY ("ProjectID") REFERENCES "ProjectDocs" ("ProjectID") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ----------------------------
+--  Table structure for Samples
+-- ----------------------------
+DROP TABLE IF EXISTS "Samples";
+CREATE TABLE "Samples" (
+	 "BatchID" integer NOT NULL,
+	 "ProjectID" INTEGER NOT NULL,
+	 "WorkflowID" INTEGER,
+	 "BatchSize" integer,
+	 "TypeID" integer,
+	 "SampleSheet" blob,
+	 "Description" TEXT,
+	 "SpeciesID" INTEGER,
+	 "Received" TEXT,
+	 "QC" TEXT,
+	 "Library" TEXT,
+	 "Run" TEXT,
+	 "Analysis" TEXT,
+	 "Comments" TEXT,
+	PRIMARY KEY("BatchID"),
+	CONSTRAINT "WorkflowID2Workflows" FOREIGN KEY ("WorkflowID") REFERENCES "Workflows" ("WorkflowID") ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT "SampleTypeID2SampleType" FOREIGN KEY ("TypeID") REFERENCES "SampleType" ("TypeID") ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT "BatchID2SampleDocs" FOREIGN KEY ("BatchID") REFERENCES "SampleDocs" ("BatchID") ON DELETE CASCADE ON UPDATE CASCADE,
+	CONSTRAINT "SampleSpeciesID2Species" FOREIGN KEY ("SpeciesID") REFERENCES "Species" ("SpeciesID") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- ----------------------------
+--  Table structure for Variables
+-- ----------------------------
+DROP TABLE IF EXISTS "Variables";
+CREATE TABLE "Variables" (
+	 "VarID" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	 "name" TEXT(255,0),
+	 "value" TEXT(255,0)
+);
+INSERT INTO "main".sqlite_sequence (name, seq) VALUES ("Variables", '0');
+
+-- ----------------------------
+--  Table structure for Workflows
+-- ----------------------------
+DROP TABLE IF EXISTS "Workflows";
+CREATE TABLE "Workflows" (
+	 "WorkflowID" INTEGER NOT NULL,
+	 "LongName" TEXT,
+	 "ShortName" TEXT,
+	PRIMARY KEY("WorkflowID")
+);
+
+-- ----------------------------
+--  Table structure for version
+-- ----------------------------
+DROP TABLE IF EXISTS "version";
+CREATE TABLE "version" (
+	 "vnum" text,
+	 "vdate" text
+);
+
+-- ----------------------------
+--  Records of version
+-- ----------------------------
+BEGIN;
+INSERT INTO "version" VALUES (1.1, 'Fri Oct 9 15:04:24 CEST 2020');
+INSERT INTO "version" VALUES (1.1, 'Fri Oct 9 17:12:11 CEST 2020');
+COMMIT;
+
+-- ----------------------------
+--  Table structure for SampleType
+-- ----------------------------
+DROP TABLE IF EXISTS "SampleType";
+CREATE TABLE "SampleType" (
+	 "TypeID" INTEGER NOT NULL,
+	 "Type" TEXT,
+	PRIMARY KEY("TypeID")
+);
+
+-- ----------------------------
+--  Records of SampleType
+-- ----------------------------
+BEGIN;
+INSERT INTO "SampleType" VALUES (1, 'DNA');
+INSERT INTO "SampleType" VALUES (2, 'RNA');
+COMMIT;
+
+-- ----------------------------
+--  Table structure for ProjectDocs
+-- ----------------------------
+DROP TABLE IF EXISTS "ProjectDocs";
+CREATE TABLE "ProjectDocs" (
+	 "ProjectID" integer NOT NULL,
+	 "Document" blob,
+	PRIMARY KEY("ProjectID")
+);
+
+-- ----------------------------
+--  Table structure for SampleDocs
+-- ----------------------------
+DROP TABLE IF EXISTS "SampleDocs";
+CREATE TABLE "SampleDocs" (
+	 "BatchID" integer NOT NULL,
+	 "Document" blob,
+	PRIMARY KEY("BatchID")
+);
+
+-- ----------------------------
+--  Table structure for Species
+-- ----------------------------
+DROP TABLE IF EXISTS "Species";
+CREATE TABLE "Species" (
+	 "SpeciesID" INTEGER NOT NULL,
+	 "Species" TEXT,
+	PRIMARY KEY("SpeciesID")
+);
+
+-- ----------------------------
+--  Records of Species
+-- ----------------------------
+BEGIN;
+INSERT INTO "Species" VALUES (1, 'Algae');
+INSERT INTO "Species" VALUES (2, 'Arabidopsis.thaliana(ThaleCress)');
+INSERT INTO "Species" VALUES (3, 'Bacteria');
+INSERT INTO "Species" VALUES (4, 'Caenorhabditis.elegans(Roundworm)');
+INSERT INTO "Species" VALUES (5, 'Drosophila.melanogaster(FruitFly)');
+INSERT INTO "Species" VALUES (6, 'Danio.rerio(Zebrafish)');
+INSERT INTO "Species" VALUES (7, 'Escherichia.coli(coli)');
+INSERT INTO "Species" VALUES (8, 'Homo.sapiens(Human)');
+INSERT INTO "Species" VALUES (9, 'Human_Mouse');
+INSERT INTO "Species" VALUES (10, 'Syntetic');
+INSERT INTO "Species" VALUES (11, 'Mammals');
+INSERT INTO "Species" VALUES (12, 'Mum.musculus(mouse)');
+INSERT INTO "Species" VALUES (13, 'Multiple');
+INSERT INTO "Species" VALUES (14, 'Nematode');
+INSERT INTO "Species" VALUES (15, 'Nicotiana.tabacum(Tobacco)');
+INSERT INTO "Species" VALUES (16, 'Oryza.sativa(rice)');
+INSERT INTO "Species" VALUES (17, 'Other');
+INSERT INTO "Species" VALUES (18, 'Animal');
+INSERT INTO "Species" VALUES (19, 'Fungus');
+INSERT INTO "Species" VALUES (20, 'Prokaryotes');
+INSERT INTO "Species" VALUES (21, 'Pichia.pastoris');
+INSERT INTO "Species" VALUES (22, 'Plant');
+INSERT INTO "Species" VALUES (23, 'Rattus.norvegicus(Rat)');
+INSERT INTO "Species" VALUES (24, 'Synthetic');
+INSERT INTO "Species" VALUES (25, 'Tetranychus');
+INSERT INTO "Species" VALUES (26, 'Virus');
+INSERT INTO "Species" VALUES (27, 'Xenopus.laevis');
+INSERT INTO "Species" VALUES (28, 'Xenopus.tropicalis');
+INSERT INTO "Species" VALUES (29, 'Yeast');
+INSERT INTO "Species" VALUES (30, 'Zea.mays(Maize)');
+COMMIT;
+
+PRAGMA foreign_keys = true;
