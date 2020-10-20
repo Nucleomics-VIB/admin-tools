@@ -5,23 +5,19 @@
 # create new Project folder name from google sheet info
 # run this code on gbw-s-nuc01 (NCWIKI) in /var/www/cgi-bin
 # called from within: create_project_folder_onL.php
+# a config file contains the variable declares 
+# it is sourced at the beginning of the script
 #
 # Stephane Plaisance (VIB-NC) 2020/07/13; v1.0
 # visit our Git: https://github.com/Nucleomics-VIB
 
-version="1.0.0, 2020_07_13"
+version="1.0.1, 2020_10_19"
 
 # single input
 number=$1
 
-Lmount="/mnt/nuc-data"
-projects="${Lmount}/Projects"
-template="${Lmount}/AppData/CreateProjectDirectory/Copy-to-Y-projects/Workflow_Exp0000.docm"
-
-# Google sheet address
-shareID=<you access ID obtained from google drive>
-gid=<gdrive gid>
-url="https://docs.google.com/spreadsheets/d/${shareID}/export?format=tsv&id=${shareID}&gid=${gid}"
+# source the config file containing the variable declares
+. /etc/create_project_folder_onL.config
 
 # TO BE EDITED AFTER CORRECTING THE GOOGLE SHEET
 declare -A types
