@@ -29,10 +29,10 @@ if [[ ! $@ =~ ^\-.+ ]]; then echo "# This command requires arguments"; echo "${u
 while getopts "i:o:u:s:p:h" opt; do
   case $opt in
     i) opt_sourcefolder=${OPTARG} ;;
-	o) opt_destfolder=${OPTARG} ;;
+    o) opt_destfolder=${OPTARG} ;;
     u) opt_user=${OPTARG} ;;
-	s) opt_server=${OPTARG} ;;
-	p) opt_destpath=${OPTARG} ;;
+    s) opt_server=${OPTARG} ;;
+    p) opt_destpath=${OPTARG} ;;
     h) echo "${usage}" >&2; exit 0 ;;
     \?) echo "Invalid option: -${OPTARG}" >&2; exit 1 ;;
     *) echo "# This command requires arguments, try -h" >&2; exit 1 ;;
@@ -52,9 +52,9 @@ fi
 
 if [ -z "${opt_destfolder}" ]
 then
-   echo "# no destination folder provided!"
-   echo "${usage}"
-   exit 1
+  echo "# no destination folder provided!"
+  echo "${usage}"
+  exit 1
 fi
 
 # or defaults
@@ -63,8 +63,8 @@ destserver=${opt_server:-"${default_server}"}
 destpath=${opt_destpath:-"${default_destpath}"}
 
 cmd="rsync -avz --rsync-path=\"mkdir -p ${destpath%/}/${opt_destfolder} && rsync \" \
-	${opt_sourcefolder} \
-	${sshuser}@${destserver}:${destpath%/}/${opt_destfolder%/}/"
-	
+  ${opt_sourcefolder} \
+  ${sshuser}@${destserver}:${destpath%/}/${opt_destfolder%/}/"
+
 echo "# command: ${cmd}"
 eval ${cmd}
