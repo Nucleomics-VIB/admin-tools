@@ -7,7 +7,9 @@
 # Stephane Plaisance (VIB-NC) 2019/11/06; v1.0
 # visit our Git: https://github.com/Nucleomics-VIB
 
-version="1.0.2, 2020_01_28"
+#version="1.0.2, 2020_01_28"
+# added darkness
+version="1.0.3, 2020_11_23"
 
 usage='## Usage: print_custom_labels.sh <options> -t <some text> ...
 # default is to print 1 to 5 rows of free text
@@ -23,6 +25,7 @@ usage='## Usage: print_custom_labels.sh <options> -t <some text> ...
 # -x <text from -t (1 of max 11 char) encodes a ASCCI ([0-9][A-Z]-.$/+% ) barcode>
 # <multiple copies>
 # -c <# copies to print (default=1)>
+# -d <darkness [-15,15] (default 0)>
 #
 # <examples>
 # printlbl.sh -F label_file.txt
@@ -42,7 +45,7 @@ usage='## Usage: print_custom_labels.sh <options> -t <some text> ...
 type="text"
 
 # parse optional parameters
-while getopts "t:MBbxF:c:h" opt; do
+while getopts "t:MBbxF:c:d:h" opt; do
     case $opt in
         t) optrows+=("$OPTARG") ;;
         M) type="medfnt" ;;
@@ -51,6 +54,7 @@ while getopts "t:MBbxF:c:h" opt; do
         b) type="numbc" ;;
         x) type="txtbc" ;;
         c) optcop=$OPTARG ;;
+        d) optdrk=$OPTARG ;;
         h) echo "${usage}" >&2; exit 0 ;;
         \?) echo "Invalid option: -${OPTARG}" >&2; exit 1 ;;
         *) echo "this command requires arguments, try -h" >&2; exit 1 ;;
@@ -76,6 +80,14 @@ fi
 # default to 1 label
 copies=${optcop:-1}
 
+# default to 0 darkness
+darkness=${optdrk:-0}
+if (("${darkness}" < -15 || "${darkness}" > 15)); then
+    echo "# darkness should be between -15 and +15"
+    echo "${usage}"
+    exit 1
+fi
+
 # debug code
 #echo "# printing ${type} labels"
 #echo "# printing ${copies} copies"
@@ -95,7 +107,7 @@ function FUNC.FILE() {
 if [ -f "${optfile}" ]; then
 while IFS=$'\t\r' read -r -a col; do
 if (( ${#col[@]} )); then
-echo '^XA
+echo '^MD'${darkness}'^XA
 ^FO15,10^A0N,32,24^FD'${col[0]}'_'${col[1]}' (VIB-NC)^FS
 ^FO15,45^A0N,32,24^FD'${col[2]}'^FS
 ^FO15,80^A0N,32,24^FD'${col[3]}'^FS
@@ -109,7 +121,7 @@ fi
 
 # 5 lines
 function FUNC.FIVE() {
-echo '^XA
+echo '^MD'${darkness}'^XA
 ^FO15,10^A0N,32,24^FD'${1}'^FS
 ^FO15,45^A0N,32,24^FD'${2}'^FS
 ^FO15,80^A0N,32,24^FD'${3}'^FS
@@ -120,7 +132,7 @@ echo '^XA
 
 # 4 lines
 function FUNC.FOUR() {
-echo '^XA
+echo '^MD'${darkness}'^XA
 ^FO15,20^A0N,36,28^FD'${1}'^FS
 ^FO15,60^A0N,36,28^FD'${2}'^FS
 ^FO15,100^A0N,36,28^FD'${3}'^FS
@@ -130,7 +142,7 @@ echo '^XA
 
 # 3 lines
 function FUNC.THREE() {
-echo '^XA
+echo '^MD'${darkness}'^XA
 ^FO15,20^A0N,48,30^FD'${1}'^FS
 ^FO15,75^A0N,48,30^FD'${2}'^FS
 ^FO15,130^A0N,48,30^FD'${3}'^FS
@@ -139,7 +151,7 @@ echo '^XA
 
 # 2 lines
 function FUNC.TWO() {
-echo '^XA
+echo '^MD'${darkness}'^XA
 ^FO15,50^A0N,48,30^FD'${1}'^FS
 ^FO15,100^A0N,48,30^FD'${2}'^FS
 ^XZ'
@@ -147,28 +159,28 @@ echo '^XA
 
 # 1 line
 function FUNC.ONE() {
-echo '^XA
+echo '^MD'${darkness}'^XA
 ^FO15,75^A0N,48,30^FD'${1}'^FS
 ^XZ'
 }
 
 # 1 line med font
 function FUNC.TXTMF() {
-echo '^XA
+echo '^MD'${darkness}'^XA
 ^FO15,80^CFT^FD'${1}'^FS
 ^XZ'
 }
 
 # 1 line big font
 function FUNC.TXTBF() {
-echo '^XA
+echo '^MD'${darkness}'^XA
 ^FO15,60^CFV^FD'${1}'^FS
 ^XZ'
 }
 
 # 1 num barcode
 function FUNC.NUMBC() {
-echo '^XA
+echo '^MD'${darkness}'^XA
 ^FO5,25^BY2
 ^A0N,32,20
 ^BCN,100,Y,N,N,N
@@ -178,7 +190,7 @@ echo '^XA
 
 # 1 txt barcode
 function FUNC.TXTBC() {
-echo '^XA
+echo '^MD'${darkness}'^XA
 ^FO5,25^BY2
 ^B3N,N,100,Y,N
 ^FD'${1}'^FS

@@ -44,8 +44,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $type = $_POST["type"];
   $text = concatText($_POST["text"]);
   $copies = test_input($_POST["copies"]);
+  $darkness = test_input($_POST["darkness"]);
   // print it
-  $cmd = "/var/www/cgi-bin/print_custom_labels.sh $size $type $text -c $copies";
+  $cmd = "/var/www/cgi-bin/print_custom_labels.sh $size $type $text -c $copies -d $darkness";
   // run it
   $message = shell_exec("$cmd");
   header("Location: http://10.112.84.39/cgi-bin/print_custom_labels_done.php");
@@ -56,7 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <h2>Custom labels on Zebra</h2>
 <p>Define the number of lines of text, the font size, and even the type of label (text/barcode or numerical BC), and submit</p>
-<p><i>(version 1.0 SP, 2020_01_31)</i></p>
+<p><i>(version 1.1 SP, 2020_11_23)</i></p>
 
 <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
   <input type="reset" style="font-size:20px";>
@@ -88,6 +89,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <br>
   <h4>Copies: (max 10 for your own safety :-))</h4>
   <input type="number" name="copies" min="1" max="10" value=1>
+  <br>
+  <h4>Darkness: (value between -15 and 15)</h4>
+  <input type="number" name="darkness" min="-15" max="15" value=0>
   <br><br>
   <hr>
   <input type="submit" name="submit" value="Submit" style="font-size:20px";>
