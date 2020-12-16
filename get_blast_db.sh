@@ -9,7 +9,7 @@
 
 usage="## Usage: get_blast_db.sh
 # -u <base URL (eg: ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt ; required)>
-# -m <current highest value for the nt archive parts (eg nt_66.tar.gz => 66 ; required)>
+# -m <current highest value for the nt archive parts (eg nt_29.tar.gz => 29 ; nr_38 => 38 required)>
 # -p <number of parallel wget jobs (default: 8)>
 # -h <show this help>"
 
@@ -18,7 +18,7 @@ if [[ ! $@ =~ ^\-.+ ]]; then echo "# This command requires arguments"; echo "${u
 while getopts "u:m:p:h" opt; do
   case $opt in
     u) opt_url=${OPTARG} ;;
-	m) opt_max=${OPTARG} ;;
+    m) opt_max=${OPTARG} ;;
     p) opt_para=${OPTARG} ;;
     h) echo "${usage}" >&2; exit 0 ;;
     \?) echo "Invalid option: -${OPTARG}" >&2; exit 1 ;;
@@ -36,7 +36,12 @@ fi
 
 if [ -z "${opt_max}" ]
 then
-   echo "# highest value for the archive parts (eg nt_66.tar.gz => 66)"
+   echo "# -m argument is missing"
+   curntmax=$(curl -s -l ftp://ftp.ncbi.nlm.nih.gov/blast/db/ |  tr " " "\n" | egrep "^nt."| grep ".tar.gz$" | sort -r | head -1)
+   curnrmax=$(curl -s -l ftp://ftp.ncbi.nlm.nih.gov/blast/db/ |  tr " " "\n" | egrep "^nr."| grep ".tar.gz$" | sort -r | head -1)
+   echo "# current last nt file is: ${curntmax}"
+   echo "# current last nr file is: ${curnrmax}"
+   echo
    echo "${usage}"
    exit 1
 fi
