@@ -73,10 +73,10 @@ if(opt$thirddata == "diskIO") {
   }
 
 p <- ggplot(data=data, aes(x=time)) +
-  geom_line(aes(y=data$memGB), color="royalblue", size=0.75, alpha=0.4) +
+  geom_line(aes(y=memGB), color="royalblue", size=0.75, alpha=0.4) +
   labs(title = paste0("usage log from: ", opt$log, " (", print.date, ")")) +
   labs(x = "time (seconds)") +
-  geom_line(aes(y=data$cpu*cpuscale), color="orange4", size=0.75, alpha=0.4) +
+  geom_line(aes(y=cpu*cpuscale), color="orange4", size=0.75, alpha=0.4) +
   labs(y = "RAM used (GB)") +
   geom_line(aes(y=thirddata*thirdscale), color="grey80", size=0.5, alpha=0.4) +
   theme(axis.title.x = element_text(colour = "grey30"),
