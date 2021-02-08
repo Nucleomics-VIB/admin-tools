@@ -34,7 +34,9 @@ comment=""
 
 # timestamp for tmp file
 ts=$(date +%s)
+# mac specific
 lts=$(date -r ${ts})
+# lts=$(date)
 
 ####################### no edits below this line #######################
 
