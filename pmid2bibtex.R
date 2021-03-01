@@ -23,7 +23,7 @@ option_list <- list(
 		help="append content to existing bib file (default overwrite)"),
 	make_option(c("-x", "--outformat"), default="bibtex",
 		help="outout format (bibtex, biblatex) (default %default)")		
-  )
+)
 
 # PARSE OPTIONS
 opt <- parse_args(OptionParser(option_list=option_list))
