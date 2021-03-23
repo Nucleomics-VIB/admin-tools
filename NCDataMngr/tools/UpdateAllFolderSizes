@@ -19,14 +19,14 @@ a_comment=${comment:-""}
 ####################### no edits below this line #######################
 
 # sqlite3 and share variables
-databasepath=${CONF_database_path}
-databasename=${CONF_database_name}
-mountpoint=${CONF_mount_transfer_point}
-mountpath=${CONF_mount_transfer_path}
+databasepath="${CONF_database_path}"
+databasename="${CONF_database_name}"
+mountpoint="${CONF_mount_transfer_point}"
+mountpath="${CONF_mount_transfer_path}"
 
 # creator
-creator=${action}
-creatorversion=${actionversion}
+creator="${action}"
+creatorversion="${actionversion}"
 
 # timestamp for tmp file
 ts=$(date +%s)

@@ -1,7 +1,5 @@
 # shared functions for NCDataMngr
-# StŽphane Plaisance - VIB-Nucleomics Core - 2019-12-23 v1.1
-#
-# Update 2021-03-16: variables from config.yaml
+# StŽphane Plaisance - VIB-Nucleomics Core - 2019-12-23 v1.0
 #
 # commented echo can be used to debug
 # please add inline documentation to explain your code
@@ -59,10 +57,12 @@ function test_duc_ssh() # test DUC access (nuc1local|nuc1ssh|nuc4ssh)
 # get folder size from DUC on the local machine (Nuc1)
 
 
-function get_folder_size_local() # get folder size from DUC on Nuc1 (local)
+function get_folder_size_local() # get folder size from DUC from Nuc1 (local)
 {
+  mountpoint="/mnt/nuc-transfer"
   folderpath=${1}
-  size=$(${CONF_duc_nuc1exe} ls -D -b -d "${CONF_duc_nuc1db}" "${CONF_duc_nuc1mnt}/${folderpath}"  2>&1)
+  size=$(duc ls -D -b \
+    -d "${CONF_duc_nuc1db}" "${CONF_duc_nuc1mnt}/${CONF_mount_transfer_path}/${folderpath}"  2>&1)
   # handle not found in DUC
   [[ ${size} == *'Requested path not found'* ]] && { echo "NULL"; } \
     || { echo ${size} | cut -d " " -f 1; }
@@ -75,9 +75,12 @@ function get_folder_size_local() # get folder size from DUC on Nuc1 (local)
 
 function get_folder_size_nuc1() # get folder size from DUC from Nuc1 (via ssh)
 {
+  sshhost="gbw-s-nuc01.luna.kuleuven.be"
+  ducdb="/opt/tools/duc/nuc_transfer.db"
+  mountpoint="/mnt/nuc-transfer"
   folderpath=${1}
-  # >&2 echo "${CONF_mount_transfer_point}/${folderpath}"
-  size=$(ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${CONF_duc_nuc1addr} ${CONF_duc_nuc1exe} ls -D -b -d ${CONF_duc_nuc1db} ${CONF_duc_nuc1mnt}/${folderpath} 2>&1)
+  # >&2 echo "${mountpoint}/${folderpath}"
+  size=$(ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${sshhost} '/opt/tools/duc/duc4 ls -D -b -d '${ducdb} ${mountpoint}/${folderpath} 2>&1)
   # handle not found in DUC
   [[ ${size} == *'Requested path not found'* ]] && { echo "NULL"; } \
     || { echo ${size} | cut -d " " -f 1; }
@@ -90,9 +93,12 @@ function get_folder_size_nuc1() # get folder size from DUC from Nuc1 (via ssh)
 
 function get_folder_size_nuc4() # get folder size from DUC from Nuc4 via ssh (obsolete)
 {
+  sshhost="gbw-s-nuc04.luna.kuleuven.be"
+  ducdb="/var/www/html/ducDB/nuc_transfer.db"
+  mountpoint="/mnt/nuc-transfer"
   folderpath=${1}
-  # >&2 echo "${CONF_mount_transfer_point}/${folderpath}"
-  size=$(ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${CONF_duc_nuc4addr} ${CONF_duc_nuc4exe} ls -D -b -d ${CONF_duc_nuc4db} ${CONF_duc_nuc4mnt}/${folderpath} 2>&1)
+  # echo "${mountpoint}/${folderpath}"
+  size=$(ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${sshhost} 'duc ls -D -b -d '${ducdb} ${mountpoint}/${folderpath}  2>&1)
   # handle not found in DUC
   [[ ${size} == *'Requested path not found'* ]] && { echo "NULL"; } \
     || { echo ${size} | cut -d " " -f 1; }
@@ -107,13 +113,16 @@ function get_folder_size_nuc4() # get folder size from DUC from Nuc4 via ssh (ob
 
 function duc_last_update_local() # get folder size, last DUC update from Nuc1 (local)
 {
-  lastupdt=$(${CONF_duc_nuc1exe} info -d ${ducdb} | tail -1 | awk '{print $1,$2}')
+  lastupdt=$('/opt/tools/duc/duc4 info -d' ${ducdb} | tail -1 | awk '{print $1,$2}')
   echo ${lastupdt:-"na"}
 }
 
 
 function duc_last_update_nuc1() # get last DUC update from Nuc1 (via ssh)
 {
-  lastupdt=$(ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${CONF_duc_nuc1addr} ${CONF_duc_nuc1exe} info -d ${CONF_duc_nuc1db} | tail -1 | awk '{print $1,$2}')
+  sshhost="gbw-s-nuc01.luna.kuleuven.be"
+  ducdb="/opt/tools/duc/nuc_transfer.db"
+  mountpoint="/mnt/nuc-transfer"
+  lastupdt=$(ssh -i ${CONF_duc_sshkey} ${CONF_duc_sshusr}@${sshhost} '/opt/tools/duc/duc4 info -d '${ducdb} | tail -1 | awk '{print $1,$2}')
   echo ${lastupdt:-"na"}
 }
