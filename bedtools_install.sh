@@ -61,6 +61,15 @@ tar -xzvf ${package}
 cd "${package%-*}2"
 make && make install prefix="${myprefix}" && cd ${myprefix}
 
+# move relevant folders out of src
+for folder in data docs genomes scripts tutorial; do
+mv ${myprefix}/src/bedtools2/${folder} ${myprefix}/
+done
+
+# copy man pages
+mkdir -p ${myprefix}/share/man/man1
+find ${myprefix}/src/bedtools2 -type f -name "*.1" -exec cp {} ${myprefix}/share/man/man1/ \;
+
 # post install steps
 echo
 echo -e "# Full Bedtools install finished, check for error messages in \"bedtools_install_${mybuild}.log\""
