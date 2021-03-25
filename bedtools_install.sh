@@ -81,4 +81,4 @@ ${myprefix}/bin/bedtools --version
 echo
 echo -e "# add: \"export PATH=\$PATH:${myprefix}/bin\" to your /etc/profile"
 echo
-echo -e "# you may also delete the folder \"${myprefix}/src\""
+echo -e "# you may also delete the build folder with rm -rf \"${myprefix}/src\""
