@@ -23,7 +23,7 @@ mybuild=$(latest_git_release "arq5x/bedtools2")
 mybuild=${mybuild#v}
 echo "# Installing the current Bedtools release : "${mybuild}
 
-echo -n "[ENTER] for '/opt/biotools' or provide a different path: "
+echo -n "[ENTER] for '/opt/biotools/bedtools2-${mybuild}' or provide a different path: "
 read mypath 
 myprefix=${mypath:-"/opt/biotools/bedtools2-${mybuild}"}
 
