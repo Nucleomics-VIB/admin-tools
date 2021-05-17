@@ -15,13 +15,15 @@ version="1.1, 2018-07-27"
 
 usage='# Usage: log_usage.sh
 #    -t <log-frequency in sec (default 60sec)>
+#    -l <name for the run log file (required)
 #    -p <precision for output (decimals, default 2)
 #    -h <this help message>
 # version: '${version}
 
-while getopts "t:p:h" opt; do
+while getopts "t:l:p:h" opt; do
   case $opt in
     t) timeint=${OPTARG} ;;
+    l) logfile=${OPTARG} ;;
     p) precision=${OPTARG} ;;
     h | *) echo "${usage}" >&2; exit 0 ;;
   esac
@@ -41,7 +43,7 @@ SCALE=${precision:-2}
 FREQ=${timeint:-60}
 
 # log file name and header
-LOG_FILE=resource_usage_"$(date +%s)".log
+LOG_FILE=${logfile:-"resource_usage_$(date +%s).log"}
 echo "logtime,cpu,diskIO,memGB,diskGB" > $LOG_FILE
 
 echo "# logging to $LOG_FILE every $FREQ sec"
