@@ -7,13 +7,9 @@
 # Stephane Plaisance (VIB-NC) 2019/11/06; v1.0
 # visit our Git: https://github.com/Nucleomics-VIB
 
-# version="1.0.2, 2020_01_28"
-# added ^MD30 to print darker
-# version="1.0.3, 2020_11_20"
+#version="1.0.2, 2020_01_28"
 # added darkness
-#version="1.0.4, 2020_11_23"
-# added prefix
-version="1.0.5, 2021_05_28"
+version="1.0.3, 2020_11_23"
 
 usage='## Usage: print_custom_labels.sh <options> -t <some text> ...
 # default is to print 1 to 5 rows of free text
@@ -85,54 +81,12 @@ fi
 copies=${optcop:-1}
 
 # default to 0 darkness
-darkness=${optdrk:-15}
+darkness=${optdrk:-0}
 if (("${darkness}" < -15 || "${darkness}" > 15)); then
     echo "# darkness should be between -15 and +15"
     echo "${usage}"
     exit 1
 fi
-
-# prefix commands to setup the printer
-# taken from Rudy's R code@
-# ^XA     # start command block
-# ^CI0    # character set 0 = Single Byte Encoding - U.S.A. 1 Character Set
-# ^JMA    # 24 dots/mm
-# ~JSO    # backfeed sequence. OFF
-# ^JUS    # save current settings
-# ^LH0,0  # set label home position
-# ^LL0189 # label length in pixels
-# ^LRN    # reverse label prin,ting set to NO
-# ^LT12   # position of the finished label
-# ^MD15   # media darkness
-# ^MMT    # tear OFF label after printing
-# ^MNW    # non-continuous media web sensing
-# ^MTT    # thermal transfer medium
-# ^PMN    # Printing Mirror Image of Labe
-# ^PON    # normal orientation
-# ^PR2,2  # print speed, sleep speed, backfeed speed (default A=2=50.8 mm/sec. (2 inches/sec.) 
-# ^PW474  # set the print width more is cut out
-# ~TA0    # after label is printed
-# ^XZ     # end command block
-
-prefix='^XA
-~TA0
-~JSO
-^LT12
-^MMT
-^MNW
-^MTT
-^PON
-^PMN
-^LH0,0
-^JMA
-^PR2,2
-^MD'${darkness}'
-^LRN
-^CI0
-^LL189
-^PW474
-^JUS
-^XZ'
 
 # debug code
 #echo "# printing ${type} labels"
@@ -153,7 +107,7 @@ function FUNC.FILE() {
 if [ -f "${optfile}" ]; then
 while IFS=$'\t\r' read -r -a col; do
 if (( ${#col[@]} )); then
-echo ${prefix}'^XA
+echo '^MD'${darkness}'^XA
 ^FO15,10^A0N,32,24^FD'${col[0]}'_'${col[1]}' (VIB-NC)^FS
 ^FO15,45^A0N,32,24^FD'${col[2]}'^FS
 ^FO15,80^A0N,32,24^FD'${col[3]}'^FS
@@ -167,7 +121,7 @@ fi
 
 # 5 lines
 function FUNC.FIVE() {
-echo -n ${prefix}'^XA
+echo '^MD'${darkness}'^XA
 ^FO15,10^A0N,32,24^FD'${1}'^FS
 ^FO15,45^A0N,32,24^FD'${2}'^FS
 ^FO15,80^A0N,32,24^FD'${3}'^FS
@@ -178,7 +132,7 @@ echo -n ${prefix}'^XA
 
 # 4 lines
 function FUNC.FOUR() {
-echo -n ${prefix}'^XA
+echo '^MD'${darkness}'^XA
 ^FO15,20^A0N,36,28^FD'${1}'^FS
 ^FO15,60^A0N,36,28^FD'${2}'^FS
 ^FO15,100^A0N,36,28^FD'${3}'^FS
@@ -188,7 +142,7 @@ echo -n ${prefix}'^XA
 
 # 3 lines
 function FUNC.THREE() {
-echo -n ${prefix}'^XA
+echo '^MD'${darkness}'^XA
 ^FO15,20^A0N,48,30^FD'${1}'^FS
 ^FO15,75^A0N,48,30^FD'${2}'^FS
 ^FO15,130^A0N,48,30^FD'${3}'^FS
@@ -197,7 +151,7 @@ echo -n ${prefix}'^XA
 
 # 2 lines
 function FUNC.TWO() {
-echo -n ${prefix}'^XA
+echo '^MD'${darkness}'^XA
 ^FO15,50^A0N,48,30^FD'${1}'^FS
 ^FO15,100^A0N,48,30^FD'${2}'^FS
 ^XZ'
@@ -205,28 +159,28 @@ echo -n ${prefix}'^XA
 
 # 1 line
 function FUNC.ONE() {
-echo -n ${prefix}'^XA
+echo '^MD'${darkness}'^XA
 ^FO15,75^A0N,48,30^FD'${1}'^FS
 ^XZ'
 }
 
 # 1 line med font
 function FUNC.TXTMF() {
-echo -n ${prefix}'^XA
+echo '^MD'${darkness}'^XA
 ^FO15,80^CFT^FD'${1}'^FS
 ^XZ'
 }
 
 # 1 line big font
 function FUNC.TXTBF() {
-echo -n ${prefix}'^XA
+echo '^MD'${darkness}'^XA
 ^FO15,60^CFV^FD'${1}'^FS
 ^XZ'
 }
 
 # 1 num barcode
 function FUNC.NUMBC() {
-echo -n ${prefix}'^XA
+echo '^MD'${darkness}'^XA
 ^FO5,25^BY2
 ^A0N,32,20
 ^BCN,100,Y,N,N,N
@@ -236,7 +190,7 @@ echo -n ${prefix}'^XA
 
 # 1 txt barcode
 function FUNC.TXTBC() {
-echo -n ${prefix}'^XA
+echo '^MD'${darkness}'^XA
 ^FO5,25^BY2
 ^B3N,N,100,Y,N
 ^FD'${1}'^FS
@@ -246,19 +200,11 @@ echo -n ${prefix}'^XA
 # label type
 case "${type}" in
     ("fromfile") FUNC.FILE ${optfile} ;;
-    ("medfnt") FUNC.TXTMF ${optrows[0]:0:23} | \
-      tr -d '[:space:]' > /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run;;
-    ("bigfnt") FUNC.TXTBF ${optrows[0]:0:13} | \
-      tr -d '[:space:]' > /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run;;
-    ("numbc") FUNC.NUMBC ${optrows[0]:0:22} | \
-      tr -d '[:space:]' > /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run;;
-    ("txtbc") FUNC.TXTBC ${optrows[0]:0:11} | \
-      tr -d '[:space:]' > /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run;;
-    (*) ${FUNCTION[${len}]} "${optrows[@]}" | \
-      tr -d '[:space:]' > /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run;;
+    ("medfnt") FUNC.TXTMF ${optrows[0]:0:23} | lpr -# ${copies} -P zebra ;;
+    ("bigfnt") FUNC.TXTBF ${optrows[0]:0:13} | lpr -# ${copies} -P zebra ;;
+    ("numbc") FUNC.NUMBC ${optrows[0]:0:22} | lpr -# ${copies} -P zebra ;;
+    ("txtbc") FUNC.TXTBC ${optrows[0]:0:11} | lpr -# ${copies} -P zebra ;;
+    (*) ${FUNCTION[${len}]} "${optrows[@]}" | lpr -# ${copies} -P zebra ;;
 esac
-
-# send print job
-lpr -# ${copies} -P zebra /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run
 
 echo "Label(s) sent to the printer"
