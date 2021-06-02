@@ -17,7 +17,8 @@ servername="invoiceplane-general"
 outfolder=/mnt/nuc-data/Archive/Backup/${servername}
 
 # mail for status
-mailto="stephane.plaisance@vib.be" 
+mailOK="stephane.plaisance@vib.be"
+mailFAIL="stephane.plaisance@vib.be"
 
 mailcontent=""
 
@@ -44,7 +45,7 @@ fi
 if [ $? -eq 0 ]; then
   mailcontent="${servername} tgz copied to L:";
 else
-  /root/mail_it "ERROR!: ${servername} automatic backup part 1 failed" "${mailto}" "${servername} tgz NOT copied to L:";
+  /root/mail_it "ERROR!: ${servername} automatic backup part 1 failed" "${mailFAIL}" "${servername} tgz NOT copied to L:";
   exit 1;
 fi
 
@@ -76,9 +77,9 @@ fi
 # send a mail
 if [ $? -eq 0 ]; then
   currdate=$(date '+%Y-%m-%d %H:%M:%S')
-  /root/mail_it "${servername} automatic backup succedeed" "${mailto}" "* ${mailcontent}\n* ${db_name} mysql dump copied to L:\n\n${currdate}";
+  /root/mail_it "${servername} automatic backup succedeed" "${mailOK}" "* ${mailcontent}\n* ${db_name} mysql dump copied to L:\n\n${currdate}";
 else
-  /root/mail_it "${servername} automatic backup part 2 failed" "${mailto}" "${db_name} mysql dump NOT copied to L:";
+  /root/mail_it "${servername} automatic backup part 2 failed" "${mailFAIL}" "${db_name} mysql dump NOT copied to L:";
   exit 1;
 fi
 
