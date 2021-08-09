@@ -11,9 +11,11 @@
 # added ^MD30 to print darker
 # version="1.0.3, 2020_11_20"
 # added darkness
-#version="1.0.4, 2020_11_23"
+# version="1.0.4, 2020_11_23"
 # added prefix
-version="1.0.5, 2021_05_28"
+# version="1.0.5, 2021_05_28"
+# added default outfile
+version="1.0.6, 2021_08_09"
 
 usage='## Usage: print_custom_labels.sh <options> -t <some text> ...
 # default is to print 1 to 5 rows of free text
@@ -47,6 +49,8 @@ usage='## Usage: print_custom_labels.sh <options> -t <some text> ...
 
 # default
 type="text"
+
+outfile="/mnt/nuc-data/AppData/BarcodeFiles/newlabel.run"
 
 # parse optional parameters
 while getopts "t:MBbxF:c:d:h" opt; do
@@ -244,21 +248,23 @@ echo -n ${prefix}'^XA
 }
 
 # label type
+# remove previous tr -d '[:space:]'
+# replace space(s) by a single &nbsp; => sed -r 's/[[:blank:]]+/\xC2\xA0/g'
 case "${type}" in
     ("fromfile") FUNC.FILE ${optfile} ;;
     ("medfnt") FUNC.TXTMF ${optrows[0]:0:23} | \
-      tr -d '[:space:]' > /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run;;
+      sed -r 's/[[:blank:]]+/\xC2\xA0/g' > ${outfile};;
     ("bigfnt") FUNC.TXTBF ${optrows[0]:0:13} | \
-      tr -d '[:space:]' > /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run;;
+      sed -r 's/[[:blank:]]+/\xC2\xA0/g' > ${outfile};;
     ("numbc") FUNC.NUMBC ${optrows[0]:0:22} | \
-      tr -d '[:space:]' > /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run;;
+      sed -r 's/[[:blank:]]+/\xC2\xA0/g' > ${outfile};;
     ("txtbc") FUNC.TXTBC ${optrows[0]:0:11} | \
-      tr -d '[:space:]' > /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run;;
+      sed -r 's/[[:blank:]]+/\xC2\xA0/g' > ${outfile};;
     (*) ${FUNCTION[${len}]} "${optrows[@]}" | \
-      tr -d '[:space:]' > /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run;;
+      sed -r 's/[[:blank:]]+/\xC2\xA0/g' > ${outfile};;
 esac
 
 # send print job
-lpr -# ${copies} -P zebra /mnt/nuc-data/AppData/BarcodeFiles/newlabel.run
+lpr -# ${copies} -P zebra ${outfile}
 
 echo "Label(s) sent to the printer"
