@@ -18,6 +18,7 @@
 version="1.0.6, 2021_08_09"
 
 usage=$(cat <<-END
+## Description: print custom labels on the Zebra printer
 ## Usage: print_custom_labels.sh <options> -t <some text> ...
 # default is to print 1 to 5 rows of free text
 # but larger font or barcodes are also possible for 1 text row
@@ -25,10 +26,10 @@ usage=$(cat <<-END
 # -F <text file with 6 tab separated columns>
 # -t <text to print as a row (can be repeated 1 to 5 times, max ~27char)>
 # <optional>
-# -M <text from -t (1 of max 23char) is printed in medium font>
-# -B <text from -t (1 of max 13char) is printed in big font>
+# -M <text from -t (1 line of text of max 23char) is printed in medium font>
+# -B <text from -t (1 line of text of max 13char) is printed in big font>
 # <barcodes>
-# -b <text from -t (1 of max 22 digits) encodes a numeric barcode>
+# -b <number string from -t (1 of max 22 digits) encodes a numeric barcode>
 # -x <text from -t (1 of max 11 char) encodes a ASCCI ([0-9][A-Z]-.$/+% ) barcode>
 # <multiple copies>
 # -c <# copies to print (default=1)>
