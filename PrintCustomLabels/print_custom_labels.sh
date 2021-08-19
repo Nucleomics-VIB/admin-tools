@@ -17,7 +17,8 @@
 # added default outfile
 version="1.0.6, 2021_08_09"
 
-usage='## Usage: print_custom_labels.sh <options> -t <some text> ...
+usage=$(cat <<-END
+## Usage: print_custom_labels.sh <options> -t <some text> ...
 # default is to print 1 to 5 rows of free text
 # but larger font or barcodes are also possible for 1 text row
 # <required either of :>
@@ -45,11 +46,12 @@ usage='## Usage: print_custom_labels.sh <options> -t <some text> ...
 # printlbl.sh -t "VIB - Nucleomics Core" -t "Herestraat 49, O&N4, Post Box 816" -t "Room nr. 404-24 / 08.428" -t "B-3000 Leuven" -t "Belgium"
 # add "-c 3" to print 3 identical copies
 #
-# SP@NC, script version '${version}
+# SP@NC, script version
+END
+)
 
-# default
+# defaults
 type="text"
-
 outfile="/mnt/nuc-data/AppData/BarcodeFiles/newlabel.run"
 
 # parse optional parameters
@@ -63,7 +65,7 @@ while getopts "t:MBbxF:c:d:h" opt; do
         x) type="txtbc" ;;
         c) optcop=$OPTARG ;;
         d) optdrk=$OPTARG ;;
-        h) echo "${usage}" >&2; exit 0 ;;
+        h) echo "${usage} ${version}" >&2; exit 0 ;;
         \?) echo "Invalid option: -${OPTARG}" >&2; exit 1 ;;
         *) echo "this command requires arguments, try -h" >&2; exit 1 ;;
     esac
