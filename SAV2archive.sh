@@ -12,11 +12,15 @@ usage="## Usage: SAV2archive.sh
 # -o <path to save the archive> (default to T:/IlluminaSavData)
 # -T <if present: add Thumbnail_Images.zip (default OFF)
 # -t <thread number for pigz (default 1)
-# -v <lots verbose output during archiving> (default OFF)
+# -v <verbose output during archiving> (default OFF)
 # -l <log commands and outputs to file> (default OFF)
 # -h <show this help>"
 
-if [[ ! $@ =~ ^\-.+ ]]; then echo "# This command requires arguments"; echo "${usage}"; exit 1; fi
+if [[ ! $@ =~ ^\-.+ ]]; then 
+  echo "# This command requires arguments"
+  echo "${usage}"
+  exit 1
+fi
 
 while getopts "i:o:t:Tvlh" opt; do
   case $opt in
