@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Print Zebra labels</title>
+<title>Print Altec labels</title>
 </head>
 <body>
 
@@ -46,25 +46,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $text = concatText($_POST["text"]);
   $copies = test_input($_POST["copies"]);
   $darkness = test_input($_POST["darkness"]);
+  $upload_file = 'uploads/print_custom_labels_slims_' . date("ymdHis") . '.' . pathinfo($_FILES["fileToUpload"]["name"], PATHINFO_EXTENSION);
+  $htmlID = $_FILES["fileToUpload"]["tmp_name"];
   // print it
-  $cmd = "/var/www/cgi-bin/print_custom_labels.sh $size $type $text -c $copies -d $darkness";
+  $file_info = new finfo(FILEINFO_MIME_TYPE); 
+  $mime_type = $file_info->buffer(file_get_contents($htmlID));
+  if ($type == ' -F'){
+    if ($mime_type == 'text/csv' or $mime_type == 'text/plain'){
+      move_uploaded_file($htmlID, "$upload_file");
+      $cmd = "/var/www/cgi-bin/print_custom_labels_slims.sh -c $copies -d $darkness -F $upload_file";
+    } else {
+      header('Location: http://10.112.84.39/cgi-bin/print_custom_labels_slims_error.php');
+    }
+  } else {
+    $cmd = "/var/www/cgi-bin/print_custom_labels_slims.sh $size $type $text -c $copies -d $darkness";
+  }
   // run it
   $message = shell_exec("$cmd");
-  header("Location: http://10.112.84.39/cgi-bin/print_custom_labels_done.php");
-  // echo "<h2>$message</h2>";
+  header("Location: http://10.112.84.39/cgi-bin/print_custom_labels_done_slims.php");
 }
 
 ?>
 
-<h2>Custom labels on Zebra</h2>
+<h2>Custom labels on Altec</h2>
 <p>Define the number of lines of text, the font size, and even the type of label (text/barcode or numerical BC), and submit</p>
-<p><i>(version 1.1 SP, 2020_11_23)</i></p>
+<p><i>(version 1.3 TS, 2021_07_19 - original from SP)</i></p>
 
-<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
-  <input type="reset" style="font-size:20px";>
+<img src="http://10.112.84.39/pictures/400px-Zebra_labels.png" />
+
+<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" enctype="multipart/form-data">
+  <input type="reset" style="font-size:14px";>
   <hr>
-  <h4>Text: (max 12 char and 5 lines)</h4>
-  <textarea rows="5" cols="" name="text">edit text</textarea>
+  <h4>Text: (max 21 char and 5 lines)</h4>
+  <textarea rows="5" cols="21" name="text">edit text</textarea>
   <br>
   <h4>Size: (only first line is printed for Medium and Large)</h4>
   <input type="radio" name="size" checked="checked"
@@ -87,15 +101,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   <input type="radio" name="type"
   <?php if (isset($type) && startsWith($type, "ASCCI")) echo "checked";?>
   value=" -x">ASCCI ([0-9][A-Z]-.$/+% ) barcode
+  <input type="radio" name="type"
+  <?php if (isset($type) && startsWith($type, "From")) echo "checked";?>
+  value=" -F">From File
   <br>
-  <h4>Copies: (max 10 for your own safety :-))</h4>
-  <input type="number" name="copies" min="1" max="10" value=1>
+  <h4>Copies: (max 35 for your own safety :-))</h4>
+  <input type="number" name="copies" min="1" max="35" value=1>
   <br>
-  <h4>Darkness: (value between -15 and 15)</h4>
-  <input type="number" name="darkness" min="-15" max="15" value=0>
+  <h4>Darkness: (value between 0 and 15)</h4>
+  <input type="number" name="darkness" min="0" max="15" value=8>
+  <br>
+  <h4>Import file:</h4>
+  <input type="file" name="fileToUpload" id="fileToUpload"/>
   <br><br>
   <hr>
-  <input type="submit" name="submit" value="Submit" style="font-size:20px";>
+  <input type="submit" name="submit" value="Submit" style="font-size:14px";>
 </form>
 </body>
 </html>
