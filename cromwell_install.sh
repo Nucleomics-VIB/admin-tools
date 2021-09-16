@@ -17,10 +17,10 @@ curl --silent "https://api.github.com/repos/$1/releases/latest" | grep '"tag_nam
 }
 
 mybuild=$(latest_git_release "broadinstitute/cromwell")
-echo "# Installing the current Cromwell release : "${mybuild}
+echo "# Installing the current Cromwell release : ${mybuild}"
 
 echo -n "[ENTER] for '/opt/biotools' or provide a different path: "
-read mypath 
+read -r mypath 
 biotools=${mypath:-"/opt/biotools"}
 
 # test if exists and abort
@@ -30,8 +30,8 @@ if [ ! -d "${biotools}" ]; then
 fi
 
 # get the jar
-cromwell=${biotools}/cromwell
-mkdir -p ${cromwell} && cd ${cromwell}
+cromwell="${biotools}/cromwell"
+mkdir -p "${cromwell}" && ( cd "${cromwell}" || return )
 
 # https://github.com/broadinstitute/cromwell/releases/download/46/cromwell-46.jar
 # https://github.com/broadinstitute/cromwell/releases/download/46/womtool-46.jar
@@ -46,16 +46,16 @@ if [ -f "womtool-${mybuild}.jar" ]; then
 fi
 
 # get fresh
-wget https://github.com/broadinstitute/cromwell/releases/download/${mybuild}/cromwell-${mybuild}.jar && \
-ln -f -s cromwell-${mybuild}.jar cromwell.jar
+wget "https://github.com/broadinstitute/cromwell/releases/download/${mybuild}/cromwell-${mybuild}.jar" && \
+ln -f -s "cromwell-${mybuild}.jar" cromwell.jar
 
 # test for success
 if [ $? -ne 0 ] ; then
         echo "# cromwell.jar was not found online"
 fi
 
-wget https://github.com/broadinstitute/cromwell/releases/download/${mybuild}/womtool-${mybuild}.jar && \
-ln -f -s womtool-${mybuild}.jar womtool.jar
+wget "https://github.com/broadinstitute/cromwell/releases/download/${mybuild}/womtool-${mybuild}.jar" && \
+ln -f -s "womtool-${mybuild}.jar" womtool.jar
 
 # test for success
 if [ $? -ne 0 ] ; then
@@ -67,5 +67,5 @@ cd ../
 # print version
 echo
 echo "# if all went right, you should see the new Cromwell and womtool versions below"
-java -jar ${cromwell}/cromwell.jar --version
-java -jar ${cromwell}/womtool.jar --version
+java -jar "${cromwell}/cromwell.jar" --version
+java -jar "${cromwell}/womtool.jar" --version

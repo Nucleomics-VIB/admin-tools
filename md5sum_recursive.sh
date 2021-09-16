@@ -8,7 +8,7 @@
 path=${1}
 title=${2:-"$(basename ${1})_md5sum.txt"}
 
-read -d '' usage <<- EOF
+read -r -d '' usage <<- EOF
 Usage: md5sum_recursive.sh <path> <prefix>
 # <path> to checksum for all files recursively
 # <prefix> for the md5sum.txt output (or '<basename of path>_md5sum.txt' as default)
@@ -22,9 +22,9 @@ if [ -z "${path}" ]; then
 fi
 
 echo "# creating md5 checksums for all files in ${path}"
-find ${path} -type f -exec md5sum '{}' \; > ${title}
+find "${path}" -type f -exec md5sum '{}' \; > "${title}"
 
 echo "# performing a md5 check against the original"
-md5sum --quiet -c ${title}
+md5sum --quiet -c "${title}"
 
 echo "# if no output above, all when well!"
