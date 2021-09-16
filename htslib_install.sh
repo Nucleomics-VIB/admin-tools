@@ -13,10 +13,10 @@
 ## get destination folder from user ##
 
 echo -n "Enter the build number you wish to install (eg 1.10) and press [ENTER]: "
-read mybuild
+read -r mybuild
 
 echo -n "Enter the full path ending with the samtools destination folder (eg /opt/biotools/samtools-1.X) and press [ENTER]: "
-read myprefix
+read -r myprefix
 
 # create destination folder
 mkdir -p "${myprefix}/src"
@@ -30,10 +30,10 @@ fi
 
 # move to the place where to download and build
 # work in a folder => easy to clean afterwards
-cd "${myprefix}/src"
+cd "${myprefix}/src" || return
 
 # capture all to log from here
-exec &> >(tee -i samtools_install_${mybuild}.log)
+exec &> >(tee -i "samtools_install_${mybuild}.log")
 
 # process one to three packages (edit these urls for future versions)
 cat <<EOL |
@@ -41,15 +41,15 @@ https://github.com/samtools/htslib/releases/download/${mybuild}/htslib-${mybuild
 EOL
 
 # loop through the list
-while read myurl; do
+while read -r myurl; do
 
 # get source
 wget "${myurl}"
 package=${myurl##*/}
-tar -xjvf ${package}
+tar -xjvf "${package}"
 
 # build and install
-cd ${package%.tar.bz2}
+cd "${package%.tar.bz2}" || return
 ./configure CPPFLAGS='-I /opt/local/include' --prefix="${myprefix}"
 make && make install && cd -
 
