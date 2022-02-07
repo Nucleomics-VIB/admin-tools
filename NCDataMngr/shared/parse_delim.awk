@@ -11,7 +11,7 @@
 # echo "print number of elements: ${#arr[@]}"
 # echo "print the array elements: ${arr[@]}"
 #
-# Stéphane Plaisance - VIB-Nucleomics Core - 2020-09-15 v1.0
+# Stéphane Plaisance - VIB-Nucleomics Core - 2020-09-15 v0.1
 
 function push(array,element)
 {

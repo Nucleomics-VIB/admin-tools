@@ -2,7 +2,7 @@
 
 # script: DBListFields
 action="DBListFields"
-actionversion="1.0; 2020-09-11"
+actionversion="0.1; 2020-09-11"
 #
 # aim: Shows a list of all fields defined in all (non *View) tables
 #      adding '-p details' shows the table design details

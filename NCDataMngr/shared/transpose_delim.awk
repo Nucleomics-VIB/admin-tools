@@ -8,7 +8,7 @@
 #
 # usage transpose_delim.awk infile
 #
-# Stéphane Plaisance - VIB-Nucleomics Core - 2020-09-17 v1.0
+# Stéphane Plaisance - VIB-Nucleomics Core - 2020-09-17 v0.1
 
 
 BEGIN {

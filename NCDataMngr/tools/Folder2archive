@@ -2,7 +2,7 @@
 
 # script: Folder2archive
 action="Folder2archive"
-actionversion="1.0; 2020-10-02"
+actionversion="0.1; 2020-10-02"
 #
 # aim: create Illumina Run folder archive and save it to ${CONF_mount_transfer_archivepath}
 

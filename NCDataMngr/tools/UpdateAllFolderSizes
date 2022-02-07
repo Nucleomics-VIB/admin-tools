@@ -2,7 +2,7 @@
 
 # script: UpdateAllFolderSizes
 action="UpdateAllFolderSizes"
-actionversion="1.0; 2020-10-07"
+actionversion="0.1; 2020-10-07"
 #
 # aim: leave or change FolderSize for all folders stored in the DB based on current DUC
 

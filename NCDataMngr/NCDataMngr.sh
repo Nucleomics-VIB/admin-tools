@@ -7,14 +7,14 @@
 # all dependencies absent from a standard linux OS 
 # are listed in dependencies.yaml for future workflow developments
 
-# Stéphane Plaisance - VIB-Nucleomics Core - 2020-09-08 v1.0
+# Stéphane Plaisance - VIB-Nucleomics Core - 2020-09-08 v0.1
 
 ######################
 # initialisation
 ######################
 
 scriptname=$(basename "$0")
-scriptversion='1.0_2020-09-10'
+scriptversion='0.1_2020-09-10'
 
 usage='# Usage: '${scriptname}' -a <action> -p <action parameter array>
 #

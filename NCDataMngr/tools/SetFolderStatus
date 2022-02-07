@@ -2,7 +2,7 @@
 
 # script: SetFolderStatus
 action="SetFolderStatus"
-actionversion="1.0; 2020-10-02"
+actionversion="0.1; 2020-10-02"
 #
 # aim: manually set Folder Status for a given FolderName + FolderName
 

@@ -2,7 +2,7 @@
 
 # script: SetFolderProtection
 action="SetFolderProtection"
-actionversion="1.0; 2020-10-02"
+actionversion="0.1; 2020-10-02"
 #
 # aim: manually set Folder Protection bit for a given FolderPath + FolderName
 

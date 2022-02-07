@@ -2,7 +2,7 @@
 
 # script: ActionDemo
 action="ActionDemo"
-actionversion="1.0; 2020-09-11"
+actionversion="0.1; 2020-09-11"
 #
 # aim: explain how to pass parameters to an action script
 # NOTE: that complex variable values need double-quote & quote

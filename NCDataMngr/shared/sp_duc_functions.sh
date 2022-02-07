@@ -1,5 +1,5 @@
 # shared functions for NCDataMngr
-# Stéphane Plaisance - VIB-Nucleomics Core - 2019-12-23 v1.1
+# Stéphane Plaisance - VIB-Nucleomics Core - 2019-12-23 v0.1
 #
 # Update 2021-03-16: variables from config.yaml
 #

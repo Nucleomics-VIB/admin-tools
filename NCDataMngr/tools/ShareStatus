@@ -2,7 +2,7 @@
 
 # script: ShareStatus
 action="DBListFields"
-actionversion="1.0; 2020-09-11"
+actionversion="0.1; 2020-09-11"
 #
 # aim: Prints the storage usage status 
 # for ${CONF_mount_transfer_point}/${CONF_mount_transfer_path} (aka THE Share)

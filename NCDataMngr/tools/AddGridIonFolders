@@ -2,7 +2,7 @@
 
 # script: AddGridIonFolders
 action="AddGridIonFolders"
-actionversion="1.0; 2020-09-28"
+actionversion="0.1; 2020-09-28"
 #
 # aim: add/update records in the database for all Illumina Folders found in
 # ${CONF_mount_transfer_point}/${CONF_mount_transfer_path}

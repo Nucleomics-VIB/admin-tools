@@ -1,5 +1,5 @@
 # shared functions for NCDataMngr
-# Stéphane Plaisance - VIB-Nucleomics Core - 2019-12-23 v1.0
+# Stéphane Plaisance - VIB-Nucleomics Core - 2019-12-23 v0.1
 #
 # commented echo can be used to debug
 # please add inline documentation to explain your code

@@ -2,7 +2,7 @@
 
 # script: CreateEmptyDB
 action="CreateEmptyDB"
-actionversion="1.1; 2020-10-20"
+actionversion="0.1; 2020-10-20"
 #
 # aim: create en empty sqlite3 database from the provided dump (structure only)
 # note: if the output exists, first rename the existing file with timestamp

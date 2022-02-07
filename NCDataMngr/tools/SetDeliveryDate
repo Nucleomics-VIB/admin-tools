@@ -2,7 +2,7 @@
 
 # script: SetDeliveryDate
 action="SetDeliveryDate"
-actionversion="1.0; 2020-10-02"
+actionversion="0.1; 2020-10-02"
 #
 # aim: manually set Delivery Date for a given FolderName + FolderName
 

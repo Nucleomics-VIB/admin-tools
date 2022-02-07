@@ -2,7 +2,7 @@
 
 # script: SAV2archive
 action="SAV2archive"
-actionversion="1.0; 2020-10-02"
+actionversion="0.1; 2020-10-02"
 #
 # aim: create Illumina SAV data archive and save it to ${CONF_mount_transfer_savpath}/${platform}
 
