@@ -3,9 +3,11 @@
 # script: SAV2archive.sh
 # Aim: create a SAV archive from files present in a Illumina Run folder
 #
-# Stéphane Plaisance - VIB-Nucleomics Core - 2020-09-21 v1.1.1
+# Stéphane Plaisance - VIB-Nucleomics Core - 2020-09-21 v1.1
 #
 # visit our Git: https://github.com/Nucleomics-VIB
+
+version="v1.1.1, 2022_06_02"
 
 usage="## Usage: SAV2archive.sh
 # -i <Illumina Run folder> (eg. 190921_7001450_0495_AH5JJ7BCX3 - required)
@@ -14,7 +16,8 @@ usage="## Usage: SAV2archive.sh
 # -t <thread number for pigz (default 1)
 # -v <verbose output during archiving> (default OFF)
 # -l <log commands and outputs to file> (default OFF)
-# -h <show this help>"
+# -h <show this help>
+version ${version}"
 
 if [[ ! $@ =~ ^\-.+ ]]; then 
   echo "# This command requires arguments"
