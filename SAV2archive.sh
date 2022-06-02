@@ -3,7 +3,7 @@
 # script: SAV2archive.sh
 # Aim: create a SAV archive from files present in a Illumina Run folder
 #
-# Stéphane Plaisance - VIB-Nucleomics Core - 2020-09-21 v1.1
+# Stéphane Plaisance - VIB-Nucleomics Core - 2020-09-21 v1.1.1
 #
 # visit our Git: https://github.com/Nucleomics-VIB
 
@@ -86,7 +86,9 @@ ts=$(date +%s)
 v=${opt_verbose:-""}
 
 # capture all to log from here if -l was provided
-${opt_log} ] && exec &> >(tee -i SAV2archive_${ts}.log)
+if [ ${opt_log} == 1 ]; then
+  exec &> >(tee -i SAV2archive_${ts}.log)
+fi
 
 ######################################
 
