@@ -6,14 +6,14 @@
 
 if [ $# -lt 2 ]; then
     echo "usage: par_rsync.sh <ori-folder> <dest-folder>"
-    echo "       optional: <parallel-jobs (default: 16)> <rsync options (default:rlgoDvx)>"
+    echo "  optional: <3:parallel-jobs (default: 4)> <4:rsync options (default:rlgoDvx)>"
     exit
 fi
 
 # Define source, target, maxdepth and cd to source
 source=${1}
 target=${2}
-maxthreads=${3:-30}
+maxthreads=${3:-4}
 rsyncopts=${4:-"rlgoDvx"}
 
 # Find all folders in the source directory within the maxdepth level
@@ -46,9 +46,12 @@ do
  sleep ${sleeptime}
  done
  # Run rsync in background for the current subfolder and move one to the next one
- nohup rsync -${rsyncopts} "${source}/${subfolder}/" "${target}/${subfolder}/" </dev/null >/dev/null 2>&1 &
+ nohup rsync -${rsyncopts} "${source}/${subfolder}/" "${target}/${subfolder}/" \
+   </dev/null \
+   >/dev/null 2>&1 &
  fi
 done
  
 # Find all files above the maxdepth level and rsync them as well
-find . -maxdepth ${depth} -type f -print0 | rsync -${rsyncopts} --files-from=- --from0 ./ "${target}/"
+find . -maxdepth ${depth} -type f -print0 | \
+  rsync -${rsyncopts} --files-from=- --from0 ./ "${target}/"
