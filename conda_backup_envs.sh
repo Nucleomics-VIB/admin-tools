@@ -4,10 +4,18 @@
 # script from https://github.com/conda/conda/issues/5165
 # author: https://github.com/DavidMertz
 # slightly modified by Stephane PLaisance - VIB Nucleomics Core
-# version 1.1; 2022-06-09
+# version 1.2; 2022-07-01
 
 # initialize conda (adapt to your own path!)
-source /etc/profile.d/conda.sh
+
+case ${OSTYPE} in
+  darwin*)
+    source /opt/miniconda3/etc/profile.d/conda.sh ;;
+  linux*)
+    source /etc/profile.d/conda.sh ;;
+  *)
+    echo "# unsupported OS"; exit 1 ;;
+esac
 
 # create date-tagged folder
 NOW=$(date "+%Y-%m-%d")
