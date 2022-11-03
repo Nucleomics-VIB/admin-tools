@@ -3,7 +3,7 @@
 # conda_backup_envs.sh
 # script from https://github.com/conda/conda/issues/5165
 # author: https://github.com/DavidMertz
-# slightly modified by Stephane PLaisance - VIB Nucleomics Core
+# slightly modified by Stephane Plaisance - VIB Nucleomics Core
 # version 1.2; 2022-07-01
 
 # initialize conda (adapt to your own path!)
