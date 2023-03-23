@@ -6,6 +6,8 @@
 
 <hl>
 
+### **getting the latest code out of Github**
+	
 A **Github ID** and **token** are required to avoid getting a max acces lilit reached error during execution of the scripts. The two strings are stored in the server in two dedicated variables that the sxcript will use.
 
 ```
