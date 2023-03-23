@@ -6,7 +6,7 @@
 
 <hl>
 
-### **getting the latest code out of Github**
+## **Install apps from a github repository**
 	
 A **Github ID** and **token** are required to avoid getting a max acces limit reached error during execution of the scripts. The two strings are stored on the server (in your .bashrc for instance) as two dedicated variables that the script will use. *This is not the safest way to handle a 'secret' Token but I did not find a better way yet (suggestions are welcome)*.
 
@@ -50,8 +50,7 @@ The bash script **[gatk_install.sh](gatk_install.sh)** eases the install of GATK
 
 The bash script **[picard_install.sh](picard_install.sh)** eases the install of PICARD tools version 2. Nothing very complex there but a single command for it all.
 
-
-### **pmid2bibtex.R**
+## **pmid2bibtex.R**
 
 The standalone R script **[pmid2bibtex.R](pmid2bibtex.R)** uses the R package 'RefManageR' to converts a list of pubmed IDs to bibtex format for integration with Rmarkdown code or LaTeX.
 
@@ -77,7 +76,7 @@ Options:
 	-h, --help
 ```
 
-### **genepattern_backup.sh**
+## **genepattern_backup.sh**
 
 This more elaborated tar wrapper make a backup of the **GenePatternServer** and/or **GenePatternUploads** folders on your server. Please edit the variables on the top of the script before running it.
 
@@ -88,7 +87,7 @@ This more elaborated tar wrapper make a backup of the **GenePatternServer** and/
 # -h <show this help>
 ```
 
-### **filesender-cmd.sh**
+## **filesender-cmd.sh**
 
 Share big data with colleagues or collaborators using the [BELNET Filesender](https://www.belnet.be/en/services/identity-mobility-federation/filesender) system from command line
 
@@ -114,7 +113,7 @@ Share big data with colleagues or collaborators using the [BELNET Filesender](ht
 
 The files remain up to 7 days on the BELNET server then are removed. The size limit is set to 100GB, alllowing sharing large projects at very high speed.
 
-### **runandlog.sh**
+## **runandlog.sh**
 
 Monitor somme script over time with **[runandlog.sh](runandlog.sh)**.
 
