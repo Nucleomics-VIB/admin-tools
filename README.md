@@ -22,6 +22,9 @@ ID=${GITHUB_ID}
 TOKEN=${GITHUB_TOKEN}
 curl --silent -u ${GITHUB_ID}:${GITHUB_TOKEN} "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 }
+	
+# the function is called with the github path (here samtools as example)
+mybuild_st=$(latest_git_release "samtools/samtools")
 ```
 
 ### **samtools_install.sh**
