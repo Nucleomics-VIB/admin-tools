@@ -8,7 +8,7 @@
 
 ### **getting the latest code out of Github**
 	
-A **Github ID** and **token** are required to avoid getting a max acces limit reached error during execution of the scripts. The two strings are stored on the server (in your .bashrc for instance) as two dedicated variables that the script will use. *This is not th esafest way to handle a secret Token but I did not find a better way yet (suggestions are welcome)*.
+A **Github ID** and **token** are required to avoid getting a max acces limit reached error during execution of the scripts. The two strings are stored on the server (in your .bashrc for instance) as two dedicated variables that the script will use. *This is not the safest way to handle a 'secret' Token but I did not find a better way yet (suggestions are welcome)*.
 
 ```
 export GITHUB_ID="your_ID"
