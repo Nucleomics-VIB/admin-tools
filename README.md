@@ -27,15 +27,15 @@ curl --silent -u ${GITHUB_ID}:${GITHUB_TOKEN} "https://api.github.com/repos/$1/r
 	
 # the function is called with the github path (here samtools as example)
 mybuild_st=$(latest_git_release "samtools/samtools")
-	
-# Note: in order to avoid the token exposure, you can replace the function above by:
+```
+
+* Note: in order to avoid the token exposure, you can replace the function above by:
 	
 ```
 function latest_git_release() {
 # argument is a quoted string like  "broadinstitute/picard"
 curl --silent "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 }
-	
 ```
 
 ### **samtools_install.sh**
