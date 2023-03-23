@@ -15,7 +15,9 @@
 
 function latest_git_release() {
 # argument is a quoted string like "arq5x/bedtools2"
-curl --silent "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+ID=${GITHUB_ID}
+TOKEN=${GITHUB_TOKEN}
+curl --silent -u ${GITHUB_ID}:${GITHUB_TOKEN}t "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
 }
 
 mybuild=$(latest_git_release "arq5x/bedtools2")
