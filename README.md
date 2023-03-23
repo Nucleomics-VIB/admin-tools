@@ -6,6 +6,24 @@
 
 <hl>
 
+A **Github ID** and **token** are required to avoid getting a max acces lilit reached error during execution of the scripts. The two strings are stored in the server in two dedicated variables that the sxcript will use.
+
+```
+export GITHUB_ID="your_ID"
+export GITHUB_TOKEN="your_secret token"
+```
+
+These strings are used in the query function which gets the latest release version out of the github repo in order to download it
+
+```
+function latest_git_release() {
+# argument is a quoted string like  "broadinstitute/picard"
+ID=${GITHUB_ID}
+TOKEN=${GITHUB_TOKEN}
+curl --silent -u ${GITHUB_ID}:${GITHUB_TOKEN} "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+}
+```
+
 ### **samtools_install.sh**
 
 The bash script **[samtools_install.sh](samtools_install.sh)** eases the install of samtools and companion packages. Nothing very complex there but a single command for it all.
