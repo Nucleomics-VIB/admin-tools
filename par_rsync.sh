@@ -2,6 +2,7 @@
 
 # script: par_rsync.sh
 # run rsync in several parallel jobs for speedup
+# the list of all source folders up to depth 2 is split in $j jobs and processed
 # 
 # from: https://www.krazyworks.com/making-rsync-faster/
 # Stéphane Plaisance - VIB-Nucleomics Core - 2019-12-23 v1.0
@@ -14,7 +15,7 @@ version="1.01, 2023_03_24"
 usage='# Usage: par_rsync.sh
 # -s <path to run folder (in the current path)> 
 # -t <path to output folder (in the current path)>
-# optional -j <number of parallell  jobs (default: 4)>
+# optional -j <number of parallel rsync jobs (default: 4)>
 # optional -o <overwrite rsync options (default: rlgoDvx)>
 # note: parallel jobs are not normalized, some may take longer!
 # script version '${version}'
