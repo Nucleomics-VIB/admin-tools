@@ -1,20 +1,50 @@
 #!/bin/bash
 
-# par_rsync.sh
-# https://www.krazyworks.com/making-rsync-faster/
+# script: par_rsync.sh
+# run rsync in several parallel jobs for speedup
+# 
+# from: https://www.krazyworks.com/making-rsync-faster/
 # Stéphane Plaisance - VIB-Nucleomics Core - 2019-12-23 v1.0
 
-if [ $# -lt 2 ]; then
-    echo "usage: par_rsync.sh <ori-folder> <dest-folder>"
-    echo "  optional: <3:parallel-jobs (default: 4)> <4:rsync options (default:rlgoDvx)>"
-    exit
+# v1.01: add optargs
+# visit our Git: https://github.com/Nucleomics-VIB
+
+version="1.01, 2023_03_24"
+
+usage='# Usage: par_rsync.sh
+# -s <path to run folder (in the current path)> 
+# -t <path to output folder (in the current path)>
+# optional -j <number of parallell  jobs (default: 4)>
+# optional -o <overwrite rsync options (default: rlgoDvx)>
+# note: parallel jobs are not normalized, some may take longer!
+# script version '${version}'
+# [-h for this help]'
+
+while getopts "s:t:j:o:h" opt; do
+  case $opt in
+    s) opt_source=${OPTARG} ;;
+    t) opt_target=${OPTARG} ;;
+    j) opt_jobs=${OPTARG} ;;
+    o) opt_args=${OPTARG} ;;
+    h) echo "${usage}" >&2; exit 0 ;;
+    \?) echo "Invalid option: -${OPTARG}" >&2; exit 1 ;;
+    *) echo "this command requires arguments, try -h" >&2; exit 1 ;;
+  esac
+done
+
+# check if required arguments were provided
+if [ -z "${opt_source+x}" ] || [ -z "${opt_target+x}" ]
+then
+   echo "# please provide mandatory arguments -s and -t!"
+   echo "${usage}"
+   exit 1
 fi
 
 # Define source, target, maxdepth and cd to source
-source=${1}
-target=${2}
-maxthreads=${3:-4}
-rsyncopts=${4:-"rlgoDvx"}
+source=${opt_source}
+target=${opt_target}
+maxthreads=${opt_jobs:-4}
+rsyncopts=${opt_args:-"rlgoDvx"}
 
 # Find all folders in the source directory within the maxdepth level
 depth=2
