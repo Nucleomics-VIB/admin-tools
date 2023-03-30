@@ -9,17 +9,19 @@
 
 usage="## Usage: get_blast_db.sh
 # -u <base URL (eg: ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt ; required)>
-# -m <current highest value for the nt archive parts (eg nt_29.tar.gz => 29 ; nr_38 => 38 required)>
+# -m <current highest value for the nt archive parts (get it from running with -i, required)>
 # -p <number of parallel wget jobs (default: 8)>
+# -i <get last number for both nr and nt to feed to -m and quit>
 # -h <show this help>"
 
 if [[ ! $@ =~ ^\-.+ ]]; then echo "# This command requires arguments"; echo "${usage}"; exit 1; fi
 
-while getopts "u:m:p:h" opt; do
+while getopts "u:m:p:ih" opt; do
   case $opt in
     u) opt_url=${OPTARG} ;;
     m) opt_max=${OPTARG} ;;
     p) opt_para=${OPTARG} ;;
+    i) opt_url="ftp://ftp.ncbi.nlm.nih.gov/blast/db/nt" ;;
     h) echo "${usage}" >&2; exit 0 ;;
     \?) echo "Invalid option: -${OPTARG}" >&2; exit 1 ;;
     *) echo "# This command requires arguments, try -h" >&2; exit 1 ;;
