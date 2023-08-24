@@ -1,42 +1,48 @@
 #! /bin/bash
 
-# script: create_project_folder_onL.sh
+# script: create_project_onL.sh
 # get Experiment number as argument
 # create new Project folder name from google sheet info
 # run this code on gbw-s-nuc01 (NCWIKI) in /var/www/cgi-bin
-# called from within: create_project_folder_onL.php
-# a config file contains the variable declares 
-# it is sourced at the beginning of the script
 #
 # Stephane Plaisance (VIB-NC) 2020/07/13; v1.0
 # visit our Git: https://github.com/Nucleomics-VIB
 
-version="1.0.1, 2020_10_19"
+# version="1.0.0, 2020_07_13"
+version="1.1.0, 2023_04_12"
 
 # single input
 number=$1
 
-# source the config file containing the variable declares
-. /etc/create_project_folder_onL.config
+Lmount="/mnt/nuc-data"
+projects="${Lmount}/Projects"
+template="${Lmount}/AppData/CreateProjectDirectory/Copy-to-Y-projects/Workflow_Exp0000.docm"
 
-# TO BE EDITED AFTER CORRECTING THE GOOGLE SHEET
+# Google sheet address
+url="https://docs.google.com/spreadsheets/d/e/2PACX-1vSjnT4BA1TyM8GROH0kUM-CSr0pQD6qnidF68XzB5rUwxwKcSpkrgytXb3Q6BIinvs2xl2tn9ikjPBR/pub?gid=536507405&single=true&output=tsv"
+
 declare -A types
 types=(
   [Unknown]="Unknown"
-  [Bioinformatics\ Only]="BioIOnly"
-  [Illumina\ MiSeq]="MiSeq"
-  [Illumina\ NextSeq]="NextSeq"
-  [Illumina\ HiSeq]="HiSeq"
-  [Illumina\ NovaSeq]="NovaSeq"
-  [PacBio\ Sequel]="PacBio"
-  [Oxford\ Nanopore\ GridION]="GridIon"
-  [MGI\ DNBSEQ-G400]="DNBSEQ-G400"
-  [QC\ Only]="SampleQC"
+  [BioInformatics]="BioIT"
+  [Illumina_MiSeq]="MiSeq"
+  [Illumina_NextSeq_2000]="NextSeq2000"
+  [Illumina_iSeq_100]="iSeq100"
+  [Illumina_NovaSeq_6000]="NovaSeq6000"
+  [PacBio_Sequel_IIe]="Sequel2e"
+  [ONT_GridION]="GridIon"
+  [ONT_P2Solo]="P2"
+  [Element_Bio_AVITI]="Aviti"
+  [MGI_DNBSEQ-G400]="G400"
+  [SampleQC]="QC"
+  [Library_Prep]="LibraryPrep"
+  [Shearing]="Shearing"
 )
 
 # fetch info in the Google sheet based on the experiment number alone
 declare -a data
-IFS="," ; data=( $(wget -q -o /dev/null -O - ${url} | gawk -v num="${number}" 'BEGIN{FS="\t"; OFS=","}{if ($1==num) print $1, $4, $8}') )
+IFS="," ; data=( $(wget -q -o /dev/null -O - ${url} | \
+  gawk -v num="${number}" 'BEGIN{FS="\t"; OFS=","}{if ($1==num) print $1, $4, $8}') )
 
 # extract info and build folder name
 exp=${data[0]}
@@ -61,7 +67,7 @@ foldername=${exp}"_"${first}${last}_${shorttype}
 ############################
 # stop if folder exists
 if [ -d "${projects}/${foldername}" ]; then
-	echo "# Folder ${foldername} already exists!"
+	echo "# ${foldername} already exists!"
 	exit 1
 fi
 
@@ -69,9 +75,9 @@ fi
 # create folder tree
 
 case "${shorttype}" in
-	BioIOnly )
+	BioIT )
 		mkdir -p ${projects}/${foldername}/{Data,RawData,Scripts} ;;
-	SampleQC )
+	QC )
 		mkdir -p ${projects}/${foldername}/{Data,RawData,WetLab} ;;
 	* )
 		mkdir -p ${projects}/${foldername}/{Data,RawData,WetLab,Scripts} ;;

@@ -39,8 +39,8 @@ fi
 if [ -z "${opt_max}" ]
 then
    echo "# -m argument is missing"
-   curntmax=$(curl -s -l ftp://ftp.ncbi.nlm.nih.gov/blast/db/ |  tr " " "\n" | egrep "^nt."| grep ".tar.gz$" | sort -r | head -1)
-   curnrmax=$(curl -s -l ftp://ftp.ncbi.nlm.nih.gov/blast/db/ |  tr " " "\n" | egrep "^nr."| grep ".tar.gz$" | sort -r | head -1)
+   curntmax=$(curl -s -l ftp://ftp.ncbi.nlm.nih.gov/blast/db/ |  tr " " "\n" | egrep "^nt.[0-9]+"| grep ".tar.gz$" | sort -r | head -1)
+   curnrmax=$(curl -s -l ftp://ftp.ncbi.nlm.nih.gov/blast/db/ |  tr " " "\n" | egrep "^nr.[0-9]+"| grep ".tar.gz$" | sort -r | head -1)
    echo "# current last nt file is: ${curntmax}"
    echo "# current last nr file is: ${curnrmax}"
    echo
