@@ -2,9 +2,14 @@
 
 # script: gi2taxonomy.py
 # Add 7-level taxonomy to a list of NCBI gi accessions
-# SP@NC; 2023-08-29; v1.0
+# NOTES:
+# performs queries live and can be very slow if too many gi are provided
 # requires biopython and ete3
 # the first run will download taxdump.tar.gz from the NCBI
+#
+# SP@NC; 2023-08-29; v1.0
+#
+# visit our Git: https://github.com/Nucleomics-VIB
 
 import sys
 from Bio import Entrez
