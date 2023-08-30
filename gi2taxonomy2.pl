@@ -28,6 +28,7 @@ my $lineages_file;
 my $output_file;
 
 # Define hash filenames
+my $gi_taxid_dump_file0 = 'gi_taxid_dump.dat0.gz';
 my $gi_taxid_dump_file = 'gi_taxid_dump.dat.gz';
 my $taxonomy_levels_dump_file = 'taxonomy_levels_dump.dat.gz';
 
@@ -89,6 +90,11 @@ if (-e $gi_taxid_dump_file && -e $taxonomy_levels_dump_file) {
 
     print "\n";
 
+    # to be removed: debug
+    print_top_values(\%gi_taxid_map, 20);
+    print "# saving the gb part of the gi_taxid_map hash to disk for faster reload next run\n";
+    save_dump(\%gi_taxid_map, $gi_taxid_dump_file0);
+
     ######### 2: nucl_wgs.accession2taxid.gz ##########
     print "# loading the ncbi wgs_accession2taxid data from $wgsaccession2taxid\n";
 
@@ -108,6 +114,10 @@ if (-e $gi_taxid_dump_file && -e $taxonomy_levels_dump_file) {
     close $wgsgiacc_fh;
     
     print "\n";
+
+    # Save hash to dump files
+    print "# saving the gi_taxid_map hash to disk for faster reload next run\n";
+    save_dump(\%gi_taxid_map, $gi_taxid_dump_file);
 
     #######################################
     # Hash to store gi and taxonomy levels
@@ -134,9 +144,9 @@ if (-e $gi_taxid_dump_file && -e $taxonomy_levels_dump_file) {
 
     print "\n";
 
-    # Save hashes to dump files
-    print "# saving the hashes to disk for faster reload next run\n";
-    save_dump(\%gi_taxid_map, $gi_taxid_dump_file);
+    # Save hash to dump files
+    print_top_values(\%taxonomy_levels, 20);
+    print "# saving the taxonomy_levels hash to disk for faster reload next run\n";
     save_dump(\%taxonomy_levels, $taxonomy_levels_dump_file);
 }
 
@@ -160,14 +170,17 @@ foreach my $gi (@gi_list) {
 }
 close $output_fh;
 
-##########################################
-# functions to load and dump large hashes 
-##########################################
+########################################
+# functions to load and dump large hash 
+########################################
 
 sub save_dump {
     my ($data_ref, $filename) = @_;
     open my $dump_fh, '|-', "gzip -c > $filename" or die "Error opening $filename for writing: $!";
-    print $dump_fh join("\n", map { "$_ $data_ref->{$_}" } keys %$data_ref);
+    foreach my $key (keys %$data_ref) {
+        print $dump_fh "$key $data_ref->{$key}\n";
+        $dump_fh->flush();
+    }
     close $dump_fh;
 }
 
@@ -182,4 +195,15 @@ sub load_dump {
     }
     close $dump_fh;
     return %data;
+}
+
+# print the first N keys and values from a hash (debug)
+sub print_top_values {
+    my ($hash_ref, $top_count) = @_;
+
+    foreach my $key (sort { $$hash_ref{$b} <=> $$hash_ref{$a} } keys %$hash_ref) {
+        last if $top_count <= 0;
+        print "Key: $key, Value: $$hash_ref{$key}\n";
+        $top_count--;
+    }
 }
