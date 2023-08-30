@@ -47,7 +47,7 @@ my @gi_list = <$gi_fh>;
 close $gi_fh;
 
 #############################
-# Hash to store gi and taxid
+# Hash to store gi => taxid
 #############################
 
 my %gi_taxid_map;
@@ -102,9 +102,9 @@ close $wgsgiacc_fh;
 
 print "\n";
 
-#######################################
-# Hash to store gi and taxonomy levels
-#######################################
+#########################################
+# Hash to store taxid => taxonomy levels
+#########################################
 
 print "# loading the ncbi lineage data from $lineages_file\n";
 
