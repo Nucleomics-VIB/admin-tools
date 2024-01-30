@@ -45,5 +45,6 @@ ncbitax2lin --nodes-file taxdump/nodes.dmp --names-file taxdump/names.dmp && \
  rm -rf taxdump taxdump.tar.gz
 
 # the resulting gzipped file is named ncbi_lineages_[date_of_utcnow].csv.gz
+# it can be converted to a sqlite3 database using python
 
 conda deactivate
