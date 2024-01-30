@@ -57,6 +57,7 @@ echo "# getting archives"
 # get archives
 printf %0${dig}d\\n $(seq 0 ${opt_max}) \
     | xargs -n 1 -P ${para} -I{} wget ${opt_url}."{}".tar.gz
+
 echo
 echo "# getting md5sums"
 
