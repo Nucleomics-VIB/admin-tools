@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 
 # script: samtools_install.sh
 # Aim: install samtools, bcftools and htslib version 1.X in one GO
