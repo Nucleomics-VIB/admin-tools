@@ -4,12 +4,14 @@
 # Aim: install yq from a selected github release
 #
 # Stéphane Plaisance - VIB-Nucleomics Core - 2021-05-25 v1.0
+# 2024-06-07 v1.1 : adding arch to Darwin to support Mx chips
 #
 # visit our Git: https://github.com/Nucleomics-VIB
 
 # get fresh
 if [ $(uname) == "Darwin" ]; then
-package=yq_darwin_amd64
+arch=$(uname -m)
+package=yq_darwin_${arch}
 elif [ $(uname) == "Linux" ]; then
 package=yq_linux_amd64
 else
