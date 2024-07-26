@@ -118,13 +118,13 @@ check_cloudconf() {
 # Function to validate the mount path
 validate_target() {
     local target=${1//\/}
-    local valid_folders=( "001_Runs" "002_RawFastq" "003_PpProject" "Test_Nextflow" )
+    local valid_folders=( "001_Runs" "002_RawFastq" "003_PpProjects" "Test_Nextflow" )
     for folder in "${valid_folders[@]}"; do
         if [ "${target}" == "${folder}" ]; then
             return 0
         fi
     done
-    echo "invalid target folder: ${target}, should be of (001_Runs, 002_RawFastq, 003_PpProject)!"
+    echo "invalid target folder: ${target}, should be of (001_Runs, 002_RawFastq, 003_PpProjects)!"
     return 1
 }
 
@@ -230,7 +230,7 @@ fi
 # Validate the mount_path if it's provided
 if [ -n "${target_path}" ]; then
     if ! validate_target "${target_path}"; then
-        echo "Error: Invalid target path. Please choose one of: 001_Runs, 002_RawFastq, 003_PpProject (Test_Nextflow)."
+        echo "Error: Invalid target path. Please choose one of: 001_Runs, 002_RawFastq, 003_PpProjects (Test_Nextflow)."
         exit 1
     fi
 fi
@@ -242,8 +242,9 @@ if [ -n "${dest_path}" ]; then
         # start sharing process
         create_and_share
     else
-        echo "# folder already exists, quitting"
-        exit 1
+        echo "# folder already exists, please check this is OK"
+        # start sharing process
+        create_and_share
     fi
 fi
 
