@@ -25,6 +25,9 @@ default_mount="NUC_Syn_NextCloud"
 # Default sharing duration in days
 default_share_duration=30
 
+# timestamp to avoid collisions when several jobs ran in //
+ts=$(date +%s)
+
 ############
 # FUNCTIONS
 ############
@@ -155,7 +158,7 @@ list_share() {
 
 create_and_share(){
         # start sharing process
-        echo "# Nextcloud sharing information:" > /tmp/sharing_info.txt
+        echo "# Nextcloud sharing information:" > /tmp/sharing_info_${ts}.txt
         # Generate a random password
         password=$(openssl rand -base64 9)
         end_date=$(date -d "+${share_duration} days" +"%Y-%m-%d")
@@ -171,12 +174,12 @@ create_and_share(){
         IFS='|' read -ra parts <<< "${share_result}"
         ( echo "share-URL:${parts[1]}";
         echo "password:${parts[2]}";
-        echo "("${parts[3]#"${parts[3]%%[![:space:]]*}"}")") | tee -a /tmp/sharing_info.txt
-        cloud-dl -u /tmp/sharing_info.txt ${mount_path}${target_path}${dest_path}/
+        echo "("${parts[3]#"${parts[3]%%[![:space:]]*}"}")") | tee -a /tmp/sharing_info_${ts}.txt
+        cloud-dl -u /tmp/sharing_info_${ts}.txt ${mount_path}${target_path}${dest_path}/sharing_info.txt
         echo "New folder created and shared successfully!"
         echo "Credentials saved to 'sharing_info.txt' and copied to the share."
         # cleanup
-        rm /tmp/sharing_info.txt
+        rm /tmp/sharing_info_${ts}.txt
 }
 
 #######
