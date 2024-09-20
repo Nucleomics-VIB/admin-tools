@@ -28,6 +28,21 @@ default_share_duration=30
 # timestamp to avoid collisions when several jobs ran in //
 ts=$(date +%s)
 
+# README.txt location
+# Define the potential file paths
+READMEFILE1="/Users/u0002316/work/Reporting_templates/Rmd-report_template/README.txt"
+READMEFILE2="/data/NC_projects/Rmd-report_template/README.txt"
+
+# Check which file exists and set READMEFILE variable
+if [ -f "$READMEFILE1" ]; then
+    READMEFILE="$READMEFILE1"
+elif [ -f "$READMEFILE2" ]; then
+    READMEFILE="$READMEFILE2"
+else
+    echo "Error: README file not found on this computer, please edit the script."
+    exit 1
+fi
+
 ############
 # FUNCTIONS
 ############
@@ -178,6 +193,7 @@ create_and_share(){
         cloud-dl -u /tmp/sharing_info_${ts}.txt ${mount_path}${target_path}${dest_path}/sharing_info.txt
         echo "New folder created and shared successfully!"
         echo "Credentials saved to 'sharing_info.txt' and copied to the share."
+        cloud-dl -u ${READMEFILE} ${mount_path}${target_path}${dest_path}/README.txt
         # cleanup
         rm /tmp/sharing_info_${ts}.txt
 }
