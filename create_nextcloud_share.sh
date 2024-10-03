@@ -54,7 +54,7 @@ display_usage() {
     echo "Usage: $0 [-m <mount name>] [-t <target folder>] [-f <shared folder>] [-s <share_duration>] [-l <list target folder>]"
     echo "Options:"
     echo " -m <mount_name>          Name of the NextCloud mount point"
-    echo " -t <target_folder>       Name of the target folder on the NextCloud mount point (of: 001_Runs, 002_RawFastq, 003_PpProject)"
+    echo " -t <target_folder>       Name of the target folder on the NextCloud mount point (of: 001_Runs, 002_RawFastq, 003_PpProjects)"
     echo " -f <shared folder_name>  Name of the folder to create on the NextCloud"
     echo " -s <share_duration>      Duration of the sharing in days (default: $share_duration)"
     echo " -l <list target folder>  Show the list of current folders on /mount/target/..."
@@ -266,6 +266,3 @@ if [ -n "${dest_path}" ]; then
         create_and_share
     fi
 fi
-
-
-
