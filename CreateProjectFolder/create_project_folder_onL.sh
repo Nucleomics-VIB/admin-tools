@@ -30,6 +30,7 @@ types=(
   [Illumina_iSeq_100]="iSeq100"
   [Illumina_NovaSeq_6000]="NovaSeq6000"
   [PacBio_Sequel_IIe]="Sequel2e"
+  [PacBio_Revio]="Revio"
   [ONT_GridION]="GridIon"
   [ONT_P2Solo]="P2"
   [Element_Bio_AVITI]="Aviti"
