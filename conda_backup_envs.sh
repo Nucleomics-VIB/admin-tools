@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # conda_backup_envs.sh
 # script from https://github.com/conda/conda/issues/5165
