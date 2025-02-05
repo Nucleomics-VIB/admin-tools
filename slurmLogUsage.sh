@@ -1,5 +1,21 @@
 #!/bin/bash
 
+# @work, sstat: error: Invalid field requested: "AveGPUUtil"
+# $ sstat --helpformat
+# AveCPU              AveCPUFreq          AveDiskRead         AveDiskWrite       
+# AvePages            AveRSS              AveVMSize           ConsumedEnergy     
+# ConsumedEnergyRaw   JobID               MaxDiskRead         MaxDiskReadNode    
+# MaxDiskReadTask     MaxDiskWrite        MaxDiskWriteNode    MaxDiskWriteTask   
+# MaxPages            MaxPagesNode        MaxPagesTask        MaxRSS             
+# MaxRSSNode          MaxRSSTask          MaxVMSize           MaxVMSizeNode      
+# MaxVMSizeTask       MinCPU              MinCPUNode          MinCPUTask         
+# Nodelist            NTasks              Pids                ReqCPUFreq         
+# ReqCPUFreqMin       ReqCPUFreqMax       ReqCPUFreqGov       TRESUsageInAve     
+# TRESUsageInMax      TRESUsageInMaxNode  TRESUsageInMaxTask  TRESUsageInMin     
+# TRESUsageInMinNode  TRESUsageInMinTask  TRESUsageInTot      TRESUsageOutAve    
+# TRESUsageOutMax     TRESUsageOutMaxNode TRESUsageOutMaxTask TRESUsageOutMin    
+# TRESUsageOutMinNode TRESUsageOutMinTask TRESUsageOutTot    
+
 # script         :slurmLogUsage.sh
 # description    :Script to monitor and log SLURM job resource usage
 # author         :SP@NC (AI)

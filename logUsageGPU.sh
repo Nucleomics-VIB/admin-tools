@@ -44,10 +44,14 @@ get_ram_usage() {
     free -b | awk '/Mem:/ {printf "%.2f", $3 / (1024*1024*1024)}'
 }
 
-# Function to check GPU existence and get GPU usage in percentage and memory in GB
 get_gpu_metrics() {
     if command -v nvidia-smi &> /dev/null; then
-        nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv,noheader,nounits | awk -F',' '{printf "%.2f,%.2f", $1, $2/1024}'
+        nvidia-smi --query-gpu=utilization.gpu,memory.used --format=csv,noheader,nounits | awk -F',' '{
+            sum_util += $1
+            sum_mem += $2
+        } END {
+            printf "%.2f,%.2f", sum_util/NR, sum_mem/(NR*1024)
+        }'
     else
         echo "0,0"
     fi
