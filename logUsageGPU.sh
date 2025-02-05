@@ -4,21 +4,35 @@
 # description    :Script to monitor and log system resource usage
 # author         :SP@NC (AI)
 # date           :2025-02-05
-# version        :1.0
-# usage          :./logUsage.sh
+# version        :1.1
+# usage          :./logUsage.sh [-i interval] [-o output_path]
 # notes          :Monitors RAM, CPU, and GPU usage during SLURM or local jobs
 
-# Set the interval in seconds
-N=10
+# Default values
+INTERVAL=10
+OUTPUT_PATH="."
+
+# Parse command line options
+while getopts ":i:o:" opt; do
+  case $opt in
+    i) INTERVAL="$OPTARG"
+    ;;
+    o) OUTPUT_PATH="$OPTARG"
+    ;;
+    \?) echo "Invalid option -$OPTARG" >&2
+    exit 1
+    ;;
+  esac
+done
 
 # set to SLURM job if exists otherwise to 'local'
-${SLURM_JOB_ID:=local}
+: ${SLURM_JOB_ID:=local}
 
 # Set the output file name using SLURM_JOB_ID
-OUTPUT_FILE="job_${SLURM_JOB_ID}_metrics.txt"
+OUTPUT_FILE="${OUTPUT_PATH}/job_${SLURM_JOB_ID}_metrics.txt"
 
 # Print header
-echo "Timestamp,UnixTimestamp,CPU_Usage(cores),RAM_Usage(GB),GPU_Usage(%),GPU_Memory(GB)" > $OUTPUT_FILE
+echo "Timestamp,UnixTimestamp,CPU_Usage(cores),RAM_Usage(GB),GPU_Usage(%),GPU_Memory(GB)" > "$OUTPUT_FILE"
 
 # Function to get CPU usage in cores
 get_cpu_usage() {
@@ -47,7 +61,7 @@ while true; do
     RAM=$(get_ram_usage)
     GPU_METRICS=$(get_gpu_metrics)
 
-    echo "${TIMESTAMP},${UNIX_TIMESTAMP},${CPU},${RAM},${GPU_METRICS}" >> $OUTPUT_FILE
+    echo "${TIMESTAMP},${UNIX_TIMESTAMP},${CPU},${RAM},${GPU_METRICS}" >> "$OUTPUT_FILE"
 
-    sleep $N
+    sleep $INTERVAL
 done
