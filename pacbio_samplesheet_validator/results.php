@@ -31,8 +31,8 @@
   print($output_string);
   ?></p>
 <br></br>
-<p><a href=<?php echo("http://".$_SERVER["HTTP_HOST"]."/index.php")?>><< Main</a></p>
-<p><a href=http://gbw-s-nuc04.luna.kuleuven.be:8080/webtools/Workflow.htm/><< Return to Webtools</a></p>
+<p><a href=<?php echo("http://".$_SERVER["HTTP_HOST"]."/webtools/pacbio_samplesheet_validator/index.php")?>><< Main</a></p>
+<p><a href=http://gbw-s-nuc04.luna.kuleuven.be:8080/webtools/Workflow.htm><< Return to Webtools</a></p>
 </div>
 </body>
 </html>

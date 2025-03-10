@@ -15,7 +15,7 @@
     <input type="submit" name="submit" value="Submit";>
   </form>
 
-    <p><a href=http://gbw-s-nuc04.luna.kuleuven.be:8080/webtools/Workflow.htm/><< Return to Webtools</a></p>
+    <p><a href=http://gbw-s-nuc04.luna.kuleuven.be:8080/webtools/Workflow.htm><< Return to Webtools</a></p>
 </div>
 </body>
 </html>
