@@ -10,6 +10,16 @@
 <body>
 <div class="container">
   <h1>PacBio Samplesheet Validator</h1>
+  
+  <!-- Added validation description -->
+  <p>Validates a PacBio barcode to name CSV files.</p>
+  <ul>
+    <li>Ensures that the file has the expected header row</li>
+    <li>Looks for duplicate barcode (col1) or duplicate name (col2)</li>
+    <li>Looks for names containing illegal characters (spaces or special characters)</li>
+    <li>Returns the number of rows with errors.</li>
+  </ul>
+  
   <form method="post"action="results.php" enctype="multipart/form-data">  
     <label>PacBio CSV:</label><input type="file" name="data[indexfile]" id="indexfile"><br>
     <input type="submit" name="submit" value="Submit";>
