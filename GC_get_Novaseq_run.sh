@@ -3,6 +3,7 @@
 # scripts: GC_get_Novaseq_run.sh
 # download run files from bucket
 # Stephane Plaisance (VIB-NC) 2025/03/12; v1.0
+# do not sync the Thumbnail_Images subfolder
 #
 # visit our Git: https://github.com/Nucleomics-VIB
 
