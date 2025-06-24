@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # script name: mailit.sh
 # send a system mail after IT task 

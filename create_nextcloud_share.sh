@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # script: create_nextcloud_share.sh
 # create a new shared folder on Nextcloud using cloud-dl
@@ -126,7 +126,7 @@ check_cloudconf() {
         server_base_url=$(grep "^host=" "$cloudconf_file" | cut -d'=' -f2)
         webdav_path=$(grep "^path=" "$cloudconf_file" | cut -d'=' -f2)
         nc_share=$(echo "${webdav_path}" | cut -d'/' -f 3)
-        echo "${nc_share}"
+        #echo "${nc_share}"
     else
         echo "Error: .cloudconf file not found in $home_dir"
         exit 1
@@ -176,21 +176,28 @@ create_and_share(){
         echo "# Nextcloud sharing information:" > /tmp/sharing_info_${ts}.txt
         # Generate a random password
         password=$(openssl rand -base64 9)
-        end_date=$(date -d "+${share_duration} days" +"%Y-%m-%d")
-        # create new folder        
+        # end_date=$(date -d "+${share_duration} days" +"%Y-%m-%d")
+        # manage OSX date command with different syntax
+        if [[ "$(uname)" == "Darwin" ]]; then
+            end_date=$(date -v+${share_duration}d +"%Y-%m-%d")
+        else
+            end_date=$(date -d "+${share_duration} days" +"%Y-%m-%d")
+        fi
+        # create new folder
         cmd="cloud-dl -k ${mount_path}${target_path}${dest_path}"
-        #echo "# ${cmd}"
+        echo "# ${cmd}"
         create_folder_result=$(eval ${cmd}) || (echo "# something went wrong while creating folder; exit 1)")
-        #echo "# folder creation: ${create_folder_result}"
+        echo "# folder creation: ${create_folder_result}"
         # Share the new folder with the generated password and duration
         cmd="cloud-dl -S ${mount_path}${target_path}${dest_path} $password $share_duration"
-        #echo "# ${cmd}"
+        echo "# ${cmd}"
         share_result=$(eval ${cmd})
         IFS='|' read -ra parts <<< "${share_result}"
         ( echo "share-URL:${parts[1]}";
         echo "password:${parts[2]}";
         echo "("${parts[3]#"${parts[3]%%[![:space:]]*}"}")") | tee -a /tmp/sharing_info_${ts}.txt
-        cloud-dl -u /tmp/sharing_info_${ts}.txt ${mount_path}${target_path}${dest_path}/sharing_info.txt
+        echo "copying to : ${mount_path}${target_path}${dest_path}/sharing_info.txt"
+        cloud-dl -u "/tmp/sharing_info_${ts}.txt" "${mount_path}${target_path}${dest_path}/sharing_info.txt"
         echo "New folder created and shared successfully!"
         echo "Credentials saved to 'sharing_info.txt' and copied to the share."
         cloud-dl -u ${READMEFILE} ${mount_path}${target_path}${dest_path}/README.txt
