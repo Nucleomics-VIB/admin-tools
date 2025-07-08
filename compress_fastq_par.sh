@@ -18,9 +18,9 @@ find . -type f \( -name \*.fq -o -name \*.fastq \) -printf "'%p'\n" > ${inlist}
 
 # compressing with ${par} jobs using each ${thr} threads
 cat ${inlist} \
-  | xargs -n 1 -P ${par} -I% (pigz -p ${thr} -c % \
+  | xargs -n 1 -P ${par} -I% sh -c 'pigz -p ${thr} -c "$1"' _ % \
   > %.gz \
-  && echo % >> ${donelist})
+  && echo % >> ${donelist}
 
 # if all went fine, delete processed fastq
 if [ $? -eq 0 ]; then
