@@ -3,8 +3,7 @@
 ###############################################################################
 # Script Name   : email-on-reboot.sh
 # Description   : Sends an email notification after a successful reboot,
-#                 only when SSH (port 22) is available. Also provides reverse
-#                 DNS lookup for logging.
+#                 only when SSH (port 22) is available.
 # Date          : 2025-07-29
 # Author        : SP@NC (+AI)
 # Version       : 1.0
