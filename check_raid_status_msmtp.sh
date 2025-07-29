@@ -1,15 +1,14 @@
 #!/bin/bash
-# check_raid_status.sh
-# Checks RAID status for all disks by ID, analyzes results, and emails status
+# check_raid_status_msmtp.sh
+# Checks RAID status for all disks by ID, analyzes results, and emails status using msmtp
 # Created: 2025-07-28
 #
 # Stephane Plaisance (VIB-NC) 2025/07/28; v1.0
 
-
 # CONFIGURATION (defaults, can be overridden by args)
 MAIL_TO="stephane.plaisance@vib.be"
 # Set MAIL_FROM to use the system's short hostname
-MAIL_FROM="check_raid_status@$(hostname -s 2>/dev/null || hostname)"
+MAIL_FROM="RAID Monitor <check_raid_status@$(hostname -s)>"
 MAIL_SUBJECT=""
 RAID_BUS="/dev/bus/0"
 LOGFILE=""
@@ -56,8 +55,6 @@ fi
 if [[ -z "$LOGFILE" ]]; then
     LOGFILE="raid_log-$(date +%s).txt"
 fi
-
-
 
 # RAID check function (writes full output to a temp file, then writes summary or full log as needed)
 checkraid() {
@@ -111,8 +108,6 @@ checkraid() {
     rm -f "$tmpfile"
 }
 
-
-
 # Run the check (status is set inside checkraid)
 checkraid
 
@@ -121,22 +116,18 @@ if [[ -z "$MAIL_SUBJECT" ]]; then
     MAIL_SUBJECT="$STATUS"
 fi
 
-
-
-# Function to send mail using sendmail (based on mailit.sh)
+# Function to send mail using msmtp
 mailit() {
     local fromopt="$1"
     local to="$2"
     local subject="$3"
     local messagefile="$4"
 
-    # check sendmail
-    if ! hash sendmail 2>/dev/null; then
-        echo "# sendmail not installed or not in PATH" >&2
+    if ! hash msmtp 2>/dev/null; then
+        echo "# msmtp not installed or not in PATH" >&2
         return 1
     fi
 
-    # check required args
     if [[ -z "$to" || -z "$subject" || -z "$messagefile" ]]; then
         echo "# to, subject, and message file are required!" >&2
         return 1
@@ -149,13 +140,13 @@ mailit() {
         from="$fromopt"
     fi
 
-    sendmail -f "$from" "$to" << EOM
-From: $from
-To: $to
-Subject: $subject
-
-$(cat "$messagefile")
-EOM
+    {
+        echo "From: $from"
+        echo "To: $to"
+        echo "Subject: $subject"
+        echo
+        cat "$messagefile"
+    } | msmtp -a gmail -f "$from" "$to"
 }
 
 # Send the log by mail using mailit
