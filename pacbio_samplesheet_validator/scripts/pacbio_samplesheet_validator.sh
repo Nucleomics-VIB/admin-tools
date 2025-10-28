@@ -4,7 +4,7 @@
 # Usage: pacbio_samplesheet_validator.sh -s <csv_file>
 # Validates PacBio barcode to names samplesheet
 # Looks for duplicate barcodes or sample names as well as invalid characters
-# Ensure there is no more than a single line-feed at the end of the file
+# Also enforces Unix line endings, no trailing whitespace, and single final newline
 # Author: SP@NC (+AI)
 # Date: 2025-10-28
 # Version: 1.2
@@ -39,6 +39,19 @@ fi
 header=$(head -n 1 "$csv_file" | tr -d '\r\n')
 if [ "$header" != "Barcode,Bio Sample" ]; then
     echo "Error: Invalid header. Expected 'Barcode,Bio Sample', but got '$header'"
+    exit 1
+fi
+
+# === Check for DOS/Windows (CRLF) line endings ===
+if grep -q $'\r' "$csv_file"; then
+    echo "Error: DOS/Windows-style line endings (CRLF) detected. Expected Unix-style LF only."
+    exit 1
+fi
+
+# === Check for trailing spaces or tabs at end of lines ===
+if grep -n -P '[ \t]+$' "$csv_file" >/dev/null; then
+    echo "Error: File contains lines with trailing spaces or tabs at the end:" 
+    grep -n -P '[ \t]+$' "$csv_file"
     exit 1
 fi
 
@@ -86,8 +99,7 @@ END {
     print "Invalid Rows:" invalid_rows;
 }' "$csv_file"
 
-# === Check for multiple line feeds at the end ===
-# Counts consecutive blank lines at file end (including extra newlines)
+# === Check for multiple line feeds (blank lines) at the end of the file ===
 end_blank_lines=$(awk '{if(length($0)==0){blank++} else {blank=0}} END{print blank}' "$csv_file")
 if [ "$end_blank_lines" -gt 0 ]; then
     echo "Error: File ends with $end_blank_lines blank line(s). Only a single line feed is allowed at end of file."
