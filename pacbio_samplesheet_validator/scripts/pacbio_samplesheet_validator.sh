@@ -4,9 +4,10 @@
 # Usage: pacbio_samplesheet_validator.sh -s <csv_file>
 # Validates PacBio barcode to names samplesheet
 # Looks for duplicate barcodes or sample names as well as invalid characters
+# Ensure there is no more than a single line-feed at the end of the file
 # Author: SP@NC (+AI)
-# Date: 2025-03-07
-# Version: 1.0
+# Date: 2025-10-28
+# Version: 1.2
 
 # Function to display usage
 usage() {
@@ -50,15 +51,13 @@ awk -v total_rows_ref="$total_rows" -v invalid_rows_ref="$invalid_rows" '
 BEGIN {
     FS=",";
     OFS=",";
-    invalid_rows = 0; # Initialize invalid_rows to 0
+    invalid_rows = 0;
 }
-NR==1 {next} # Skip header
+NR==1 {next}
 {
-    gsub(/\r$/, ""); # Remove carriage return if present
-    total_rows++; # Increment total row counter
-
-    invalid = 0; # Flag to track if the row is invalid
-
+    gsub(/\r$/, "");
+    total_rows++;
+    invalid = 0;
     if (NF != 2) {
         print "Error: Invalid number of columns in row " NR ": " $0;
         invalid = 1;
@@ -71,23 +70,26 @@ NR==1 {next} # Skip header
         print "Error: Duplicate Bio Sample value in row " NR ": " $2;
         invalid = 1;
     }
-    if ($2 !~ /^[A-Za-z0-9_-]+$/) {
+    if ($2 !~ /^[A-Za-z0-9_-.]+$/) {
         print "Error: Invalid characters in Bio Sample value in row " NR ": " $2;
         invalid = 1;
     }
-
-    # Track duplicates and valid values for future checks
     barcode[$1]++;
     biosample[$2]++;
-
-    # Increment invalid row counter if the row is invalid
     if (invalid) {
         invalid_rows++;
     }
 }
 END {
-    # Print summary statistics at the end of processing
     print "\nValidation Summary:";
     print "Total Rows (excluding header):" total_rows;
     print "Invalid Rows:" invalid_rows;
 }' "$csv_file"
+
+# === Check for multiple line feeds at the end ===
+# Counts consecutive blank lines at file end (including extra newlines)
+end_blank_lines=$(awk '{if(length($0)==0){blank++} else {blank=0}} END{print blank}' "$csv_file")
+if [ "$end_blank_lines" -gt 0 ]; then
+    echo "Error: File ends with $end_blank_lines blank line(s). Only a single line feed is allowed at end of file."
+    exit 1
+fi
