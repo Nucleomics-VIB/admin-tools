@@ -1,26 +1,33 @@
 [(Nucleomics-VIB)](https://github.com/Nucleomics-VIB)
 
-## pacbio_samplesheet_validator.sh 
+## PacBio Samplesheet Cleaner
 
-Validates a PacBio barcode to name CSV files.
+Cleans and validates PacBio barcode-to-name CSV files via a web interface and shell script.
 
-* ensures that the file has the expected header row.
-* looks for duplicate barcode (col1) or duplicate name (col2)
-* looks for names containing illegal characters (spaces or special characters)
+### Features
+* Ensures the file has the expected header row (`Barcode,Bio Sample`).
+* Removes extra columns beyond the first two.
+* Removes leading/trailing spaces and replaces invalid characters with underscores.
+* Converts to Unix line endings and removes empty rows.
+* Provides a cleaned CSV file for download via the web interface.
 
-Returns the number of rows and with errors
+### Usage (Web Interface)
+1. Go to the PacBio Samplesheet Cleaner web page.
+2. Upload your CSV file.
+3. Click Submit.
+4. Download the cleaned CSV file using the provided button.
 
+### Usage (Shell Script)
 ```bash
-# usage: pacbio_samplesheet_validator.sh -s sampleSheet.csv
+# usage: pacbio_samplesheet_cleaner.sh -s sampleSheet.csv
 ```
+This will create a cleaned file in the uploads directory with a datetag in the filename.
 
-*[[back-to-top](#top)]*  
-
-<hr>
+---
 
 <h4>Please send comments and feedback to <a href="mailto:nucleomics.bioinformatics@vib.be">nucleomics.bioinformatics@vib.be</a></h4>
 
-<hr>
+---
 
 ![Creative Commons License](http://i.creativecommons.org/l/by-sa/3.0/88x31.png?raw=true)
 
