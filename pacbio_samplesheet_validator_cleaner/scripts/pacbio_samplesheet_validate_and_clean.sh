@@ -30,6 +30,37 @@ usage() {
     exit 1
 }
 
+# Function to clean up old temporary and output files (older than 1 day)
+cleanup_old_files() {
+    local uploads_dir="$1"
+    local current_time=$(date +%s)
+    local one_day_seconds=$((24 * 60 * 60))
+
+    if [ ! -d "$uploads_dir" ]; then
+        return
+    fi
+
+    # Find and delete files older than 1 day
+    find "$uploads_dir" -type f \( -name "tmp_cleaned_*.csv" -o -name "*_cleaned_*.csv" \) | while read -r file; do
+        # Get file modification time (compatible with both Linux and macOS)
+        if command -v stat &> /dev/null; then
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                file_time=$(stat -f%m "$file" 2>/dev/null)
+            else
+                file_time=$(stat -c%Y "$file" 2>/dev/null)
+            fi
+        fi
+
+        if [ -n "$file_time" ]; then
+            age=$((current_time - file_time))
+            if [ $age -gt $one_day_seconds ]; then
+                rm -f "$file"
+                # Uncomment for debug: echo "Deleted old file: $file (age: $((age / 3600)) hours)" >&2
+            fi
+        fi
+    done
+}
+
 # Parse command line options
 while getopts ":s:o:" opt; do
     case $opt in
@@ -51,6 +82,11 @@ if [ ! -f "$csv_file" ]; then
     echo "${errors[@]}"
     exit 1
 fi
+
+# Clean up old files from previous runs
+script_dir="$(cd "$(dirname "$0")/.." && pwd)"
+uploads_dir="$script_dir/uploads"
+cleanup_old_files "$uploads_dir"
 
 # === STEP 1: CHECK AND FIX HEADER ===
 header=$(head -n 1 "$csv_file" | tr -d '\r\n')
@@ -264,7 +300,7 @@ if [ "$output_lines" -eq 0 ]; then
 fi
 
 # === STEP 9: CLEANUP ===
-rm -f tmp_unix_$$.csv "$tmp_with_duplicates" 2>/dev/null
+rm -f tmp_unix_$$.csv "$tmp_cleaned" "$tmp_with_duplicates" 2>/dev/null
 
 # === STEP 10: REPORT RESULTS ===
 echo "=== VALIDATION AND CLEANING REPORT ==="
