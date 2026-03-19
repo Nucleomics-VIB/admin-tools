@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# script: samtools_install.sh
-# Aim: install samtools, bcftools and htslib version 1.X in one GO
+# script: bcftools_install.sh
+# Aim: install bcftools version 1.X in one GO
 #
 # Stéphane Plaisance - VIB-Nucleomics Core - 2017-09-27 v1.2
 # update to samtools 1.6 2017-10-26
