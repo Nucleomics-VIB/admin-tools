@@ -9,14 +9,28 @@
 #
 # visit our Git: https://github.com/Nucleomics-VIB
 
-######################################
-## get destination folder from user ##
+function latest_git_release() {
+# argument is a quoted string like  "broadinstitute/picard"
+ID=${GITHUB_ID}
+TOKEN=${GITHUB_TOKEN}
+curl --silent -u ${GITHUB_ID}:${GITHUB_TOKEN} "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
+}
 
-echo -n "Enter the build number you wish to install (eg 1.10) and press [ENTER]: "
-read mybuild
+############################################################
+## get build automatically & destination folder from user ##
 
-echo -n "Enter the full path ending with the samtools destination folder (eg /opt/biotools/samtools-1.X) and press [ENTER]: "
-read myprefix
+mybuild=$(latest_git_release "samtools/bcftools")
+echo "# Installing the current bcftools release : "${mybuild_bc}
+
+echo -n "# Provide a path OR type [ENTER] for '/opt/biotools/bcftools_${mybuild}': "
+read mypath 
+myprefix=${mypath:-"/opt/biotools/bcftools_${mybuild_st}"}
+
+# test if exists and abort
+if [ -d "${myprefix}" ]; then
+        echo "# This folder already exists, change its name or move it then restart this script."
+        exit 0
+fi
 
 # create destination folder
 mkdir -p "${myprefix}/src"
@@ -26,16 +40,10 @@ if [ $? -ne 0 ] ; then
         echo "# You were not allowed to create this path"
 fi
 
-######################################
-
-# move to the place where to download and build
-# work in a folder => easy to clean afterwards
-cd "${myprefix}/src"
-
 # capture all to log from here
-exec &> >(tee -i samtools_install_${mybuild}.log)
+exec &> >(tee -i bcftools_install_${mybuild}.log)
 
-# process three packages (edit these urls for future versions)
+# process packages (edit these urls for future versions)
 cat <<EOL |
 https://github.com/samtools/bcftools/releases/download/${mybuild}/bcftools-${mybuild}.tar.bz2
 EOL
