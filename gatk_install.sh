@@ -5,80 +5,100 @@
 #
 # Stéphane Plaisance - VIB-Nucleomics Core - 2018-08-01 v1.0
 # now finds the latest release automatically 2020-05-04 v1.1
+# 2026-09-05 v1.2 fail safely: report the online release first, refuse an empty
+#                 version from the GitHub API, download BEFORE deleting the
+#                 working install, guard every cd, use "ln -sfn" so the link is
+#                 replaced instead of created inside the old folder, and return
+#                 a non-zero exit code on every error
 #
 # visit our Git: https://github.com/Nucleomics-VIB
+
+set -o pipefail
+
+function latest_git_release() {
+# argument is a quoted string like "broadinstitute/gatk"
+curl --silent --fail --max-time 30 "https://api.github.com/repos/$1/releases/latest" \
+  | grep '"tag_name":' \
+  | sed -E 's/.*"([^"]+)".*/\1/'
+}
+
+######################################
+## report the release to install    ##
+
+# take the version from the first argument, otherwise ask GitHub for the latest
+mybuild=${1:-$(latest_git_release "broadinstitute/gatk")}
+
+# 2026-09-05: the GitHub API is unauthenticated and rate-limited. When it fails
+# mybuild is empty and the URL becomes ".../download//gatk-.zip". The old
+# script deleted the installed release before discovering that.
+if [ -z "${mybuild}" ]; then
+        echo "# could not read the latest GATK release from GitHub."
+        echo "# give the version as first argument, eg: $(basename "$0") 4.7.0.0"
+        exit 1
+fi
+
+# report where the version came from before anything is changed
+if [ -n "$1" ]; then
+        echo "# GATK release requested : ${mybuild}"
+else
+        echo "# latest GATK release online : ${mybuild}"
+fi
 
 ######################################
 ## get destination folder from user ##
 
-function latest_git_release() {
-# argument is a quoted string like  "broadinstitute/gatk"
-ID=${GITHUB_ID}
-TOKEN=${GITHUB_TOKEN}
-curl --silent -u ${GITHUB_ID}:${GITHUB_TOKEN} "https://api.github.com/repos/$1/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'
-}
-
-mybuild=$(latest_git_release "broadinstitute/gatk")
-echo "# Installing the current GATK release : "${mybuild}
-
 echo -n "[ENTER] for '/opt/biotools' or provide a different path: "
-read mypath 
+read -r mypath
 biotools=${mypath:-"/opt/biotools"}
 
 # test if exists and abort
 if [ ! -d "${biotools}" ]; then
         echo "# This path was not found, check it and restart this script."
-        exit 0
+        exit 1
 fi
 
-# get the zip and decompress it
-cd ${biotools}
-
-# check if already there and delete
-if [ -f "gatk-${mybuild}.zip" ]; then
-        rm "gatk-${mybuild}.zip"
-fi
-
-if [ -d "gatk-${mybuild}" ]; then
-        rm -rf "gatk-${mybuild}"
-fi
-
-# get fresh
-wget https://github.com/broadinstitute/gatk/releases/download/${mybuild}/gatk-${mybuild}.zip && \
-        unzip gatk-${mybuild}.zip &&
-        rm gatk-${mybuild}.zip
-
-# test for success
-if [ $? -ne 0 ] ; then
-        echo "# The archive was not found online or could not be decompressed"
-fi
+cd "${biotools}" || exit 1
 
 ######################################
+## get the archive                  ##
 
-# create new link
-gatklnk="gatk"
+zipfile="gatk-${mybuild}.zip"
 
-if [ -L "${gatklnk}" ]; then
-        unlink ${gatklnk}
+# 2026-09-05: download FIRST, to a .part file. The old order removed
+# gatk-${mybuild} and the zip before wget ran, so a failed download left no
+# usable GATK at all.
+if ! wget -O "${zipfile}.part" \
+     "https://github.com/broadinstitute/gatk/releases/download/${mybuild}/${zipfile}"; then
+        echo "# The archive for release ${mybuild} was not found online."
+        echo "# The existing GATK install was left untouched."
+        rm -f "${zipfile}.part"
+        exit 1
 fi
 
-ln -s gatk-${mybuild} ${gatklnk}
+mv "${zipfile}.part" "${zipfile}" || exit 1
 
-# test for success
-if [ $? -ne 0 ] ; then
-        echo "# The link to the new build folder could not be created"
+# only now is it safe to replace the previous copy of this same release
+rm -rf "gatk-${mybuild}"
+
+if ! unzip -q "${zipfile}"; then
+        echo "# The archive could not be decompressed."
+        rm -f "${zipfile}"
+        exit 1
 fi
 
-# create link in the build folder
-cd gatk && \
-        ln -s "gatk-package-${mybuild}-local.jar" gatk.jar
+rm -f "${zipfile}"
 
-# test for success
-if [ $? -ne 0 ] ; then
-        echo "# The link to the new jar file could not be created"
-fi
+######################################
+## link the new build               ##
 
-cd ../
+# 2026-09-05: "ln -sfn". Without -n, and with "gatk" already a symlink to a
+# directory, ln creates the new link INSIDE the old folder instead of
+# replacing it.
+ln -sfn "gatk-${mybuild}" gatk || exit 1
+
+cd gatk || exit 1
+ln -sfn "gatk-package-${mybuild}-local.jar" gatk.jar || exit 1
+cd "${biotools}" || exit 1
 
 # print version
 echo
