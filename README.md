@@ -113,6 +113,18 @@ Share big data with colleagues or collaborators using the [BELNET Filesender](ht
 
 The files remain up to 7 days on the BELNET server then are removed. The size limit is set to 100GB, alllowing sharing large projects at very high speed.
 
+## **delivery_readme.sh**
+
+Write the customer **README.txt** for a Nextcloud delivery folder with **[delivery_readme.sh](delivery_readme.sh)**. `create_nextcloud_share.sh`, `kinnexdata2synnextcloud.sh` and `gDNAdata2synnextcloud.sh` use it.
+
+The README is the house template in the private repo `Nucleomics-VIB-internal/shared-resources` (`standard-files/nextcloud-delivery/README.txt`). The script fetches the current template from GitHub at each delivery, so a new template version needs no edit here. It needs `curl` and a `gh` login that can read that repo. If the fetch fails, it uses [`assets/README.txt`](assets/README.txt) and prints a warning: that copy can be older than the template.
+
+```bash
+# usage: delivery_readme.sh <destination file>
+```
+
+*[[back-to-top](#top)]*  
+
 ## **runandlog.sh**
 
 Monitor somme script over time with **[runandlog.sh](runandlog.sh)**.
