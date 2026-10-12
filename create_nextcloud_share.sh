@@ -9,6 +9,7 @@
 # requires openssh to create the password
 #
 # Stephane Plaisance (VIB-NC) 2024/07/01; v1.0
+# 2026-10-12; v1.1: README.txt is the current house template (delivery_readme.sh)
 
 #####################
 # default parameters
@@ -28,20 +29,9 @@ default_share_duration=30
 # timestamp to avoid collisions when several jobs ran in //
 ts=$(date +%s)
 
-# README.txt location
-# Define the potential file paths
-READMEFILE1="/Users/u0002316/work/Reporting_templates/Rmd-report_template/README.txt"
-READMEFILE2="/data/NC_projects/Rmd-report_template/README.txt"
-
-# Check which file exists and set READMEFILE variable
-if [ -f "$READMEFILE1" ]; then
-    READMEFILE="$READMEFILE1"
-elif [ -f "$READMEFILE2" ]; then
-    READMEFILE="$READMEFILE2"
-else
-    echo "Error: README file not found on this computer, please edit the script."
-    exit 1
-fi
+# README.txt: the current house template, fetched from GitHub at each run,
+# with the copy in assets/README.txt as the fallback (see delivery_readme.sh)
+source "$(dirname "$(readlink -f "$0")")/delivery_readme.sh" || exit 1
 
 ############
 # FUNCTIONS
@@ -200,9 +190,10 @@ create_and_share(){
         cloud-dl -u "/tmp/sharing_info_${ts}.txt" "${mount_path}${target_path}${dest_path}/sharing_info.txt"
         echo "New folder created and shared successfully!"
         echo "Credentials saved to 'sharing_info.txt' and copied to the share."
-        cloud-dl -u ${READMEFILE} ${mount_path}${target_path}${dest_path}/README.txt
+        get_delivery_readme "/tmp/README_${ts}.txt" \
+          && cloud-dl -u "/tmp/README_${ts}.txt" "${mount_path}${target_path}${dest_path}/README.txt"
         # cleanup
-        rm /tmp/sharing_info_${ts}.txt
+        rm -f /tmp/sharing_info_${ts}.txt /tmp/README_${ts}.txt
 }
 
 #######

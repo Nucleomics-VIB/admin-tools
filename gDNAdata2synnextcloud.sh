@@ -37,7 +37,7 @@ md5sum -c ${expnum}_archive_md5.txt && \
   mv ${expnum}_archive* ${targetdir}/
 
 # add readme
-cp /data/NC_projects/Rmd-report_template/README.txt ${targetdir}/
+"$(dirname "$(readlink -f "$0")")/delivery_readme.sh" "${targetdir}/README.txt"
 
 # create share and add sharing info
 create_nextcloud_share.sh \
