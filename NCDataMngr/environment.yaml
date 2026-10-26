@@ -1,7 +1,7 @@
 ## software requirements for the whole project
 # file: environment.yaml
 # this file is meant to install all dependencies using conda
-# search for dependencies at https://anaconda.org/anaconda/repo
+# search for dependencies at https://anaconda.org/conda-forge/repo
 # please include a validated version number as minimal version
 # and test more recent versions before editing this file
 
@@ -15,9 +15,9 @@
 name: NDCDataMngr_env
 
 channels:
-  - defaults
-  - bioconda
   - conda-forge
+  - bioconda
+  - nodefaults
 
 # examples
 # specific version
