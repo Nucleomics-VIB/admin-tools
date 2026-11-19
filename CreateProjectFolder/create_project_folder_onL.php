@@ -3,7 +3,8 @@
  // script: 'create_project_folder_onL.php'
  // runs: 'create_project_folder_onL.sh'
  // links to: 'create_project_folder_onL_done.php'
- // version 1.0.0
+ // version 1.1.0, 2026-11-19: the number must have 1 to 4 digits and is escaped (#12)
+ // needs PHP 8.2.35 or newer (#11)
  // visit our Git: https://github.com/Nucleomics-VIB
 -->
 
@@ -18,12 +19,13 @@ session_start();
 // define variables and set to empty values
 $number = $cmd = $result = "";
 
-function test_input ($data) {
-  // $data = trim($data);
-  //$data = stripslashes($data);
-  $data = htmlspecialchars($data);
-  //$data = str_replace(' ', '_', $data);
-  return $data;
+// return the command, or null when the number does not have 1 to 4 digits (#12)
+function build_cmd ($post) {
+  $number = trim($post["number"] ?? "");
+  if (!preg_match('/^[0-9]{1,4}$/', $number)) {
+    return null;
+  }
+  return "/var/www/cgi-bin/create_project_folder_onL.sh ".escapeshellarg($number);
 }
 
 function startsWith ($string, $startString){
@@ -50,10 +52,13 @@ function concatText ($input){
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $number = test_input($_POST["number"]);
   // build command
-  $cmd = "/var/www/cgi-bin/create_project_folder_onL.sh $number";
-  $result = shell_exec("$cmd 2>&1");
+  $cmd = build_cmd($_POST);
+  if ($cmd === null) {
+    $result = "# the project number must have 1 to 4 digits";
+  } else {
+    $result = shell_exec("$cmd 2>&1");
+  }
   $_SESSION['result'] = $result;
   header("Location: http://10.112.84.39/cgi-bin/create_project_folder_onL_done.php" );
 }
@@ -76,6 +81,6 @@ action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>"
 
 <hr>
 
-<p><i>(version 1.0 SP, 2020_07_13)</i></p>
+<p><i>(version 1.1 SP, 2026_11_19)</i></p>
 </body>
 </html>
